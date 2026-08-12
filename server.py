@@ -2,6 +2,8 @@ import os
 import sys
 import json
 import sqlite3
+import urllib.request
+import urllib.parse
 from flask import Flask, render_template, request, jsonify, send_from_directory
 
 # Import functions and constants from app.py

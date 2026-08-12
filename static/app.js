@@ -425,8 +425,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Fetch Image asynchronously from Colab GPU proxy
             (async () => {
-                const imgElem = document.getElementById(imgId);
-                const hdrElem = document.getElementById(`hdr-${imgId}`);
+                const imgElem = triggerCard.querySelector('.rendered-ai-img');
+                const hdrElem = triggerCard.querySelector('.image-header');
                 const promptLower = imageTrigger.toLowerCase();
 
                 let fallbackUrl = '';
@@ -464,7 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     clearTimeout(timeoutId);
                     const data = await res.json();
                     if (data.status === 'success' && data.image_b64) {
-                        imgElem.src = data.image_b64;
+                        if (imgElem) imgElem.src = data.image_b64;
                         if (hdrElem) hdrElem.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles" style="color: #00f5d4;"></i> <span><strong>✨ Foto AI Baru Digambar via Colab GPU Engine!</strong></span>`;
                         return;
                     }
