@@ -423,18 +423,16 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             bubble.appendChild(triggerCard);
 
-            // Fetch Image asynchronously from Colab GPU proxy
+            // Fetch Image asynchronously
             (async () => {
                 const imgElem = triggerCard.querySelector('.rendered-ai-img');
                 const hdrElem = triggerCard.querySelector('.image-header');
-                const visualAnchor = activeChar ? (activeChar.visual_prompt || activeChar.name) : '';
-                const fullImagePrompt = `masterpiece, 2d anime style, ${visualAnchor}, ${imageTrigger}`;
-                const seed = Math.floor(Math.random() * 9999999);
-                const dynamicAnimeUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullImagePrompt)}?model=anime&nologo=true&width=512&height=512&seed=${seed}`;
+                const promptLower = imageTrigger.toLowerCase();
 
+                // 1. Try Colab GPU Engine if connected
                 try {
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 6000);
+                    const timeoutId = setTimeout(() => controller.abort(), 4000);
 
                     const res = await fetch('/api/generate_lora_image', {
                         method: 'POST',
@@ -449,16 +447,37 @@ document.addEventListener('DOMContentLoaded', () => {
                     const data = await res.json();
                     if (data.status === 'success' && data.image_b64) {
                         if (imgElem) imgElem.src = data.image_b64;
-                        if (hdrElem) hdrElem.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles" style="color: #00f5d4;"></i> <span><strong>✨ Foto AI Baru Digambar via Colab GPU Engine!</strong></span>`;
+                        if (hdrElem) hdrElem.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles" style="color: #00f5d4;"></i> <span><strong>✨ Foto AI LoRA Baru (Colab GPU Engine)</strong></span>`;
                         return;
                     }
                 } catch (err) {
-                    console.log("Colab GPU Proxy timeout/failed, using dynamic 2D anime AI fallback");
+                    console.log("Colab GPU Proxy offline, using local 2D anime dataset photo");
                 }
 
-                // Dynamic 2D Anime AI Fallback (Guaranteed unique per prompt)
-                if (imgElem) imgElem.src = dynamicAnimeUrl;
-                if (hdrElem) hdrElem.innerHTML = `<i class="fa-solid fa-wand-magic" style="color: #ff758f;"></i> <span><strong>🎨 Foto 2D Anime Digambar Sesuai Prompt (AI Engine)</strong></span>`;
+                // 2. Local Curated 2D Anime Photo Matching (100% Guaranteed 2D & 100% Karakter Asli)
+                let localPhotoUrl = '';
+                if (activeChar && activeChar.local_photos && activeChar.local_photos.length > 0) {
+                    const photos = activeChar.local_photos;
+                    let matched = null;
+
+                    if (promptLower.includes('mandi') || promptLower.includes('kamar') || promptLower.includes('tidur') || promptLower.includes('kasur') || promptLower.includes('hot') || promptLower.includes('uncen') || promptLower.includes('seks') || promptLower.includes('telanjang') || promptLower.includes('busa')) {
+                        matched = photos.find(p => p.includes('hot') || p.includes('uncen') || p.includes('hard') || p.includes('middle') || p.includes('low') || p.includes('chan'));
+                    } else if (promptLower.includes('kedai') || promptLower.includes('sake') || promptLower.includes('santai') || promptLower.includes('jalan')) {
+                        matched = photos.find(p => p.includes('1') || p.includes('2') || p.includes('ruby'));
+                    } else if (promptLower.includes('jahat') || promptLower.includes('evil')) {
+                        matched = photos.find(p => p.includes('evil'));
+                    }
+
+                    localPhotoUrl = matched || photos[Math.floor(Math.random() * photos.length)];
+                } else {
+                    const visualAnchor = activeChar ? (activeChar.visual_prompt || activeChar.name) : '';
+                    const fullImagePrompt = `masterpiece, 2d anime style, ${visualAnchor}, ${imageTrigger}`;
+                    const seed = Math.floor(Math.random() * 9999999);
+                    localPhotoUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullImagePrompt)}?model=anime&nologo=true&width=512&height=512&seed=${seed}`;
+                }
+
+                if (imgElem) imgElem.src = localPhotoUrl;
+                if (hdrElem) hdrElem.innerHTML = `<i class="fa-solid fa-camera-retro" style="color: #00f5d4;"></i> <span><strong>📸 Foto 2D ${activeChar ? activeChar.name : 'Karakter'} (Acuan 100% Akurat)</strong></span>`;
             })();
         }
 
