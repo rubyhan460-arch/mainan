@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="nsfw">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chatbotmainanfarhan - Personal Character AI Gallery & Chat</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- BACKGROUND AMBIENT LIGHTING -->
+        <div class="ambient-glow bg-glow-1"></div>
+        <div class="ambient-glow bg-glow-2"></div>
+
+        <!-- SIDEBAR DRAWER -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <i class="fa-solid fa-fire-flame-curved brand-icon"></i>
+                    <div>
+                        <h2 class="brand-title">Chatbotmainanfarhan</h2>
+                        <span class="brand-subtitle">Personal AI Roleplay</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NAVIGATION MENU -->
+            <div class="nav-menu">
+                <button class="nav-btn active" id="navExplore">
+                    <i class="fa-solid fa-border-all"></i>
+                    <span>Explore Cards Grid</span>
+                </button>
+                <button class="nav-btn" id="navActiveChat">
+                    <i class="fa-solid fa-comments"></i>
+                    <span id="navActiveChatLabel">Active Chat</span>
+                </button>
+            </div>
+
+            <!-- SIDEBAR CHARACTER LIST -->
+            <div class="sidebar-section">
+                <span class="section-label"><i class="fa-solid fa-users-viewfinder"></i> Karakter Tersedia</span>
+                <div class="character-list" id="characterList">
+                    <!-- Dynamic Character Cards Loaded via JS -->
+                    <div class="loading-skeleton">Memuat karakter...</div>
+                </div>
+            </div>
+
+            <!-- QUICK TOOLS & ACTIONS -->
+            <div class="sidebar-footer">
+                <button class="tool-btn" id="btnOpenFacts">
+                    <i class="fa-solid fa-brain"></i>
+                    <span>Memori Facts SQLite</span>
+                </button>
+                <button class="tool-btn" id="btnOpenKey">
+                    <i class="fa-solid fa-key"></i>
+                    <span>Set Groq API Key</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN VIEWPORT CONTAINER -->
+        <main class="main-viewport">
+
+            <!-- VIEW 1: EXPLORE CARDS GALLERY GRID VIEW (SPICYCHAT STYLE) -->
+            <section class="explore-view" id="exploreView">
+                <div class="explore-header">
+                    <div>
+                        <h1 class="explore-title">Explore Characters</h1>
+                        <p class="explore-subtitle">Pilih karakter roleplay favoritmu untuk mulai bercakap-cakap</p>
+                    </div>
+                    <div class="explore-search-bar">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="text" id="inputSearchChar" placeholder="Cari nama karakter, tag, atau scenario...">
+                    </div>
+                </div>
+
+                <!-- CATEGORY PILLS FILTER -->
+                <div class="category-pills" id="categoryPills">
+                    <button class="pill active" data-filter="all">Semua Tipe</button>
+                    <button class="pill" data-filter="nsfw"><i class="fa-solid fa-fire"></i> Uncensored (NSFW)</button>
+                    <button class="pill" data-filter="medium"><i class="fa-solid fa-heart"></i> Medium Ecchi</button>
+                    <button class="pill" data-filter="safe"><i class="fa-solid fa-shield-heart"></i> Safe /
+                        Strict</button>
+                </div>
+
+                <!-- CARDS GRID CONTAINER -->
+                <div class="spicy-grid" id="spicyGrid">
+                    <!-- Dynamic SpicyChat-Style Character Cards Loaded via JS -->
+                </div>
+            </section>
+
+            <!-- VIEW 2: ACTIVE CHAT ROOM VIEW -->
+            <section class="chat-view hidden" id="chatView">
+                <!-- CHAT HEADER BAR -->
+                <header class="chat-header">
+                    <div class="active-char-info">
+                        <button class="btn-close-chat" id="btnCloseChat" title="Close Chat & Kembali ke Gallery Grid">
+                            <i class="fa-solid fa-xmark"></i>
+                            <span>Close Chat</span>
+                        </button>
+                        <div class="avatar-wrapper" id="headerAvatarWrapper">
+                            <div class="avatar-fallback" id="headerAvatarFallback">T</div>
+                        </div>
+                        <div class="char-details">
+                            <div class="name-row">
+                                <h3 id="headerCharName">Tsunade</h3>
+                                <span class="badge badge-nsfw" id="headerBadge">UNCENSORED</span>
+                            </div>
+                            <p class="char-title" id="headerCharTitle">Hokage Kelima (Naruto)</p>
+                        </div>
+                    </div>
+
+                    <!-- AFFINITY SCORE & METRICS -->
+                    <div class="header-actions">
+                        <div class="affinity-meter-box">
+                            <div class="affinity-label">
+                                <i class="fa-solid fa-heart"></i>
+                                <span>Affinity Score</span>
+                                <strong id="headerAffinityScore">10/100</strong>
+                            </div>
+                            <div class="progress-bar-track">
+                                <div class="progress-bar-fill" id="headerAffinityBar" style="width: 10%;"></div>
+                            </div>
+                        </div>
+                        <button class="icon-action-btn" id="btnClearHistory"
+                            title="Bersihkan Chat History Karakter Ini">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                </header>
+
+                <!-- CHAT MESSAGES STREAM CONTAINER -->
+                <div class="messages-container" id="messagesContainer">
+                    <!-- Messages populated via JS -->
+                </div>
+
+                <!-- TYPING INDICATOR -->
+                <div class="typing-indicator-bar hidden" id="typingIndicator">
+                    <div class="typing-dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                    <span id="typingText">Karakter sedang mengetik balasan...</span>
+                </div>
+
+                <!-- INPUT CONTROL PANEL -->
+                <div class="input-container">
+                    <div class="input-glass-box">
+                        <textarea id="messageInput"
+                            placeholder="Tulis obrolan atau aksi *roleplay* di sini... (Shift+Enter untuk baris baru)"
+                            rows="1"></textarea>
+                        <button class="send-btn" id="btnSend">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <div class="input-footer-info">
+                        <span><i class="fa-solid fa-sparkles"></i> Gunakan tanda <code>*aksi fisik*</code> untuk narasi
+                            kontak fisik / ekspresi</span>
+                        <span id="activeEngineBadge"><i class="fa-solid fa-bolt"></i> Groq Llama-3.3-70B Active</span>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODAL MEMORI FACTS SQLITE -->
+    <div class="modal-overlay hidden" id="modalFacts">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-brain"></i> Memori Facts Teresktraksi (SQLite)</h3>
+                <button class="close-modal-btn" id="btnCloseFacts">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-desc">Fakta-fakta tentang kamu yang otomatis dideteksi dan disimpan secara permanen di
+                    database SQLite oleh AI:</p>
+                <div class="facts-grid" id="factsGrid">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL SET GROQ API KEY -->
+    <div class="modal-overlay hidden" id="modalKey">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-key"></i> Pengaturan Groq API Key</h3>
+                <button class="close-modal-btn" id="btnCloseKey">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-desc">Masukkan Groq API Key gratisan kamu (dapat dari console.groq.com) untuk performa
+                    14.400 chat/hari tercepat & tanpa limit:</p>
+                <div class="input-group">
+                    <input type="password" id="inputGroqKey" placeholder="gsk_..." autocomplete="off">
+                    <button class="btn-primary" id="btnSaveKey">Simpan Key</button>
+                </div>
+                <div class="key-status-box" id="keyStatusBox">
+                    <!-- Status loaded via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application JS -->
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+
+</html>

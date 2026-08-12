@@ -1,0 +1,5 @@
+config.json
+database.db
+riwayat_chat_semalam.md
+__pycache__/
+*.pyc
