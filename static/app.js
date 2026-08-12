@@ -427,26 +427,10 @@ document.addEventListener('DOMContentLoaded', () => {
             (async () => {
                 const imgElem = triggerCard.querySelector('.rendered-ai-img');
                 const hdrElem = triggerCard.querySelector('.image-header');
-                const promptLower = imageTrigger.toLowerCase();
-
-                let fallbackUrl = '';
-                if (activeChar && activeChar.local_photos && activeChar.local_photos.length > 0) {
-                    const photos = activeChar.local_photos;
-                    let matched = null;
-                    if (promptLower.includes('kamar') || promptLower.includes('tidur') || promptLower.includes('kasur') || promptLower.includes('hot') || promptLower.includes('seks')) {
-                        matched = photos.find(p => p.includes('hot') || p.includes('uncen') || p.includes('chan'));
-                    } else if (promptLower.includes('kedai') || promptLower.includes('sake') || promptLower.includes('santai')) {
-                        matched = photos.find(p => p.includes('1') || p.includes('2') || p.includes('ruby'));
-                    } else if (promptLower.includes('jahat') || promptLower.includes('evil')) {
-                        matched = photos.find(p => p.includes('evil'));
-                    }
-                    fallbackUrl = matched || photos[Math.floor(Math.random() * photos.length)];
-                } else {
-                    const visualAnchor = activeChar ? (activeChar.visual_prompt || activeChar.name) : '';
-                    const fullImagePrompt = `masterpiece, 2d anime style, ${visualAnchor}, ${imageTrigger}`;
-                    const seed = Math.floor(Math.random() * 9999999);
-                    fallbackUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullImagePrompt)}?model=anime&nologo=true&width=512&height=512&seed=${seed}`;
-                }
+                const visualAnchor = activeChar ? (activeChar.visual_prompt || activeChar.name) : '';
+                const fullImagePrompt = `masterpiece, 2d anime style, ${visualAnchor}, ${imageTrigger}`;
+                const seed = Math.floor(Math.random() * 9999999);
+                const dynamicAnimeUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullImagePrompt)}?model=anime&nologo=true&width=512&height=512&seed=${seed}`;
 
                 try {
                     const controller = new AbortController();
@@ -469,12 +453,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         return;
                     }
                 } catch (err) {
-                    console.log("Colab GPU Proxy timeout/failed, using instant fallback photo");
+                    console.log("Colab GPU Proxy timeout/failed, using dynamic 2D anime AI fallback");
                 }
 
-                // Fallback to local photo library
-                if (imgElem) imgElem.src = fallbackUrl;
-                if (hdrElem) hdrElem.innerHTML = `<i class="fa-solid fa-camera-retro"></i> <span><strong>📸 Foto ${activeChar ? activeChar.name : 'Karakter'} (Album Lokal)</strong></span>`;
+                // Dynamic 2D Anime AI Fallback (Guaranteed unique per prompt)
+                if (imgElem) imgElem.src = dynamicAnimeUrl;
+                if (hdrElem) hdrElem.innerHTML = `<i class="fa-solid fa-wand-magic" style="color: #ff758f;"></i> <span><strong>🎨 Foto 2D Anime Digambar Sesuai Prompt (AI Engine)</strong></span>`;
             })();
         }
 
