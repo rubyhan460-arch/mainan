@@ -400,58 +400,82 @@ document.addEventListener('DOMContentLoaded', () => {
         if (imageTrigger) {
             const triggerCard = document.createElement('div');
             triggerCard.className = 'generated-image-card';
-
-            let imageUrl = '';
-            const promptLower = imageTrigger.toLowerCase();
-
-            if (activeChar && activeChar.local_photos && activeChar.local_photos.length > 0) {
-                const photos = activeChar.local_photos;
-
-                // Smart Keyword Matching against user request / scenario
-                let matched = null;
-                if (promptLower.includes('kamar') || promptLower.includes('tidur') || promptLower.includes('kasur') || promptLower.includes('hot') || promptLower.includes('seks')) {
-                    matched = photos.find(p => p.includes('hot') || p.includes('uncen') || p.includes('chan'));
-                } else if (promptLower.includes('kedai') || promptLower.includes('sake') || promptLower.includes('santai')) {
-                    matched = photos.find(p => p.includes('1') || p.includes('2') || p.includes('ruby'));
-                } else if (promptLower.includes('jahat') || promptLower.includes('evil')) {
-                    matched = photos.find(p => p.includes('evil'));
-                }
-
-                // If matched, use it; otherwise cycle through local photo library
-                if (matched) {
-                    imageUrl = matched;
-                } else {
-                    imageUrl = photos[Math.floor(Math.random() * photos.length)];
-                }
-            } else {
-                // Fallback online
-                const visualAnchor = activeChar ? (activeChar.visual_prompt || activeChar.name) : '';
-                const fullImagePrompt = `masterpiece, 2d anime style, official anime art, ${visualAnchor}, ${imageTrigger}`;
-                const encodedPrompt = encodeURIComponent(fullImagePrompt);
-                const seed = Math.floor(Math.random() * 9999999);
-                imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=anime&nologo=true&width=512&height=512&seed=${seed}`;
-            }
+            const imgId = 'ai-img-' + Math.floor(Math.random() * 999999);
 
             triggerCard.innerHTML = `
-                <div class="image-header">
-                    <i class="fa-solid fa-camera-retro"></i>
-                    <span><strong>📸 Foto ${activeChar ? activeChar.name : 'Karakter'} (Acuan Gambar Lokal 100% Akurat)</strong></span>
+                <div class="image-header" id="hdr-${imgId}">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span><strong>🚀 Meminta GPU Colab Menggambar Foto ${activeChar ? activeChar.name : ''}...</strong></span>
                 </div>
                 <div class="image-wrapper-box">
-                    <div class="image-loading-spinner">
+                    <div class="image-loading-spinner" id="spin-${imgId}">
                         <i class="fa-solid fa-spinner fa-spin"></i>
-                        <span>Memuat foto ${activeChar ? activeChar.name : ''}...</span>
+                        <span>Sedang menggambar via Free Colab GPU (NVIDIA T4)...</span>
                     </div>
-                    <img src="${imageUrl}" 
+                    <img id="${imgId}" 
                          alt="${imageTrigger}" 
                          class="rendered-ai-img hidden"
-                         onload="this.classList.remove('hidden'); if(this.previousElementSibling) this.previousElementSibling.style.display='none'; if(window.scrollToBottom) window.scrollToBottom();"
-                         onerror="if(this.previousElementSibling) this.previousElementSibling.innerHTML='⚠️ Gagal memuat foto.';"
+                         onload="this.classList.remove('hidden'); const sp = document.getElementById('spin-${imgId}'); if(sp) sp.style.display='none'; if(window.scrollToBottom) window.scrollToBottom();"
+                         onerror="const sp = document.getElementById('spin-${imgId}'); if(sp) sp.innerHTML='⚠️ Gagal memuat foto.';"
                     >
                 </div>
                 <div class="image-prompt-caption">Skenario: <em>"${imageTrigger}"</em></div>
             `;
             bubble.appendChild(triggerCard);
+
+            // Fetch Image asynchronously from Colab GPU proxy
+            (async () => {
+                const imgElem = document.getElementById(imgId);
+                const hdrElem = document.getElementById(`hdr-${imgId}`);
+                const promptLower = imageTrigger.toLowerCase();
+
+                let fallbackUrl = '';
+                if (activeChar && activeChar.local_photos && activeChar.local_photos.length > 0) {
+                    const photos = activeChar.local_photos;
+                    let matched = null;
+                    if (promptLower.includes('kamar') || promptLower.includes('tidur') || promptLower.includes('kasur') || promptLower.includes('hot') || promptLower.includes('seks')) {
+                        matched = photos.find(p => p.includes('hot') || p.includes('uncen') || p.includes('chan'));
+                    } else if (promptLower.includes('kedai') || promptLower.includes('sake') || promptLower.includes('santai')) {
+                        matched = photos.find(p => p.includes('1') || p.includes('2') || p.includes('ruby'));
+                    } else if (promptLower.includes('jahat') || promptLower.includes('evil')) {
+                        matched = photos.find(p => p.includes('evil'));
+                    }
+                    fallbackUrl = matched || photos[Math.floor(Math.random() * photos.length)];
+                } else {
+                    const visualAnchor = activeChar ? (activeChar.visual_prompt || activeChar.name) : '';
+                    const fullImagePrompt = `masterpiece, 2d anime style, ${visualAnchor}, ${imageTrigger}`;
+                    const seed = Math.floor(Math.random() * 9999999);
+                    fallbackUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullImagePrompt)}?model=anime&nologo=true&width=512&height=512&seed=${seed}`;
+                }
+
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+                    const res = await fetch('/api/generate_lora_image', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        signal: controller.signal,
+                        body: JSON.stringify({
+                            char_id: activeChar ? activeChar.id : 'char',
+                            prompt: imageTrigger
+                        })
+                    });
+                    clearTimeout(timeoutId);
+                    const data = await res.json();
+                    if (data.status === 'success' && data.image_b64) {
+                        imgElem.src = data.image_b64;
+                        if (hdrElem) hdrElem.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles" style="color: #00f5d4;"></i> <span><strong>✨ Foto AI Baru Digambar via Colab GPU Engine!</strong></span>`;
+                        return;
+                    }
+                } catch (err) {
+                    console.log("Colab GPU Proxy timeout/failed, using instant fallback photo");
+                }
+
+                // Fallback to local photo library
+                if (imgElem) imgElem.src = fallbackUrl;
+                if (hdrElem) hdrElem.innerHTML = `<i class="fa-solid fa-camera-retro"></i> <span><strong>📸 Foto ${activeChar ? activeChar.name : 'Karakter'} (Album Lokal)</strong></span>`;
+            })();
         }
 
         row.appendChild(nameSpan);

@@ -152,6 +152,36 @@ def api_manage_colab_gpu():
         cfg = get_config()
         return jsonify({"colab_url": cfg.get('colab_gpu_url', '')})
 
+@app.route('/api/generate_lora_image', methods=['POST'])
+def api_generate_lora_image():
+    data = request.get_json() or {}
+    char_id = data.get('char_id', 'char')
+    prompt = data.get('prompt', '')
+    
+    cfg = get_config()
+    colab_url = cfg.get('colab_gpu_url', '').strip().rstrip('/')
+    
+    if not colab_url:
+        return jsonify({"status": "no_colab", "message": "Colab GPU not configured"}), 400
+        
+    try:
+        req_url = f"{colab_url}/generate"
+        payload = json.dumps({"char_id": char_id, "prompt": prompt}).encode('utf-8')
+        headers = {
+            "Content-Type": "application/json",
+            "Bypass-Tunnel-Remainder": "1",
+            "bypass-tunnel-reminder": "1",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+        }
+        req = urllib.request.Request(req_url, data=payload, headers=headers, method="POST")
+        # Hard 10-second timeout so app never hangs
+        with urllib.request.urlopen(req, timeout=10) as response:
+            res_data = json.loads(response.read().decode('utf-8'))
+            return jsonify(res_data)
+    except Exception as e:
+        print(f"Colab GPU Proxy Error / Timeout: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 if __name__ == '__main__':
     print("\n=======================================================")
     print(" CHARACTER AI WEB APP - STARTING LOCAL FLASK SERVER")
