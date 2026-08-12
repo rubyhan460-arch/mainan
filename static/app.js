@@ -565,30 +565,65 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch('/api/key');
             const data = await res.json();
-            if (data.has_key) {
-                keyStatusBox.innerHTML = `<span style="color: #00f5d4;"><i class="fa-solid fa-check"></i> Groq API Key Aktif: (${data.key_preview})</span>`;
+
+            const inputGeminiKey = document.getElementById('inputGeminiKey');
+            const inputGroqKey = document.getElementById('inputGroqKey');
+            const inputColabUrl = document.getElementById('inputColabUrl');
+
+            if (data.colab_gpu_url) inputColabUrl.value = data.colab_gpu_url;
+
+            let html = '';
+            if (data.has_gemini_key) {
+                html += `<div style="color: #00f5d4;"><i class="fa-solid fa-check"></i> Gemini 1.5 API Key Aktif (${data.gemini_preview})</div>`;
             } else {
-                keyStatusBox.innerHTML = `<span style="color: #ffb703;"><i class="fa-solid fa-triangle-exclamation"></i> Belum ada Groq API Key (Menggunakan Pollinations Fallback)</span>`;
+                html += `<div style="color: #ffb703;"><i class="fa-solid fa-circle-info"></i> Gemini API Key belum diisi (Opsional)</div>`;
             }
+
+            if (data.has_groq_key) {
+                html += `<div style="color: #00f5d4;"><i class="fa-solid fa-check"></i> Groq Llama-3.3 API Key Aktif (${data.groq_preview})</div>`;
+            } else {
+                html += `<div style="color: #ffb703;"><i class="fa-solid fa-circle-info"></i> Groq API Key belum diisi (Opsional)</div>`;
+            }
+
+            if (data.colab_gpu_url) {
+                html += `<div style="color: #00f5d4;"><i class="fa-solid fa-bolt"></i> Colab GPU Engine Tunnel Connected!</div>`;
+            } else {
+                html += `<div style="color: #bc93aa;"><i class="fa-solid fa-info-circle"></i> Engine Gambar: Menggunakan Dataset Local & Pollinations Model Anime</div>`;
+            }
+
+            keyStatusBox.innerHTML = html;
         } catch (err) {
-            console.error("Error checking key:", err);
+            console.error("Error checking key status:", err);
         }
     }
 
     async function handleSaveKey() {
-        const key = inputGroqKey.value.trim();
+        const gemini_key = document.getElementById('inputGeminiKey').value.trim();
+        const groq_key = document.getElementById('inputGroqKey').value.trim();
+        const colab_url = document.getElementById('inputColabUrl').value.trim();
+
         try {
-            await fetch('/api/key', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ key })
-            });
-            inputGroqKey.value = '';
+            if (gemini_key || groq_key) {
+                await fetch('/api/key', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ gemini_key, groq_key })
+                });
+            }
+
+            if (colab_url !== undefined) {
+                await fetch('/api/colab_gpu', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ colab_url })
+                });
+            }
+
             await checkApiKeyStatus();
-            alert('Groq API Key berhasil disimpan!');
+            alert('Pengaturan API & GPU Engine berhasil disimpan!');
             modalKey.classList.add('hidden');
         } catch (err) {
-            console.error("Error saving key:", err);
+            console.error("Error saving settings:", err);
         }
     }
 

@@ -63,8 +63,8 @@
                     <span>Memori Facts SQLite</span>
                 </button>
                 <button class="tool-btn" id="btnOpenKey">
-                    <i class="fa-solid fa-key"></i>
-                    <span>Set Groq API Key</span>
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>API & GPU Engine Settings</span>
                 </button>
             </div>
         </aside>
@@ -191,21 +191,40 @@
         </div>
     </div>
 
-    <!-- MODAL SET GROQ API KEY -->
+    <!-- MODAL SETTINGS (GROQ, GEMINI & COLAB GPU TUNNEL) -->
     <div class="modal-overlay hidden" id="modalKey">
         <div class="modal-card">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-key"></i> Pengaturan Groq API Key</h3>
+                <h3><i class="fa-solid fa-sliders"></i> Pengaturan API & Engine GPU Colab</h3>
                 <button class="close-modal-btn" id="btnCloseKey">&times;</button>
             </div>
             <div class="modal-body">
-                <p class="modal-desc">Masukkan Groq API Key gratisan kamu (dapat dari console.groq.com) untuk performa
-                    14.400 chat/hari tercepat & tanpa limit:</p>
-                <div class="input-group">
-                    <input type="password" id="inputGroqKey" placeholder="gsk_..." autocomplete="off">
-                    <button class="btn-primary" id="btnSaveKey">Simpan Key</button>
+                <p class="modal-desc">Atur API Key LLM Teks (Gemini 1.5 Flash / Groq) dan URL Colab GPU Tunnel untuk Generasi Gambar 2D Anime LoRA:</p>
+                
+                <div class="settings-section">
+                    <label class="setting-label"><strong>✨ Gemini 1.5 Flash API Key (Primary - BLOCK_NONE Safety):</strong></label>
+                    <div class="input-group">
+                        <input type="password" id="inputGeminiKey" placeholder="AIzaSy..." autocomplete="off">
+                    </div>
                 </div>
-                <div class="key-status-box" id="keyStatusBox">
+
+                <div class="settings-section" style="margin-top: 12px;">
+                    <label class="setting-label"><strong>⚡ Groq API Key (Secondary Llama 3.3):</strong></label>
+                    <div class="input-group">
+                        <input type="password" id="inputGroqKey" placeholder="gsk_..." autocomplete="off">
+                    </div>
+                </div>
+
+                <div class="settings-section" style="margin-top: 12px;">
+                    <label class="setting-label"><strong>🚀 Colab GPU Tunnel URL (Free NVIDIA T4 GPU Engine):</strong></label>
+                    <div class="input-group">
+                        <input type="text" id="inputColabUrl" placeholder="https://xxxx.loca.lt atau ngrok URL..." autocomplete="off">
+                    </div>
+                </div>
+
+                <button class="btn-primary" id="btnSaveKey" style="width: 100%; margin-top: 16px;">Simpan Semua Pengaturan</button>
+
+                <div class="key-status-box" id="keyStatusBox" style="margin-top: 14px;">
                     <!-- Status loaded via JS -->
                 </div>
             </div>

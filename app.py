@@ -210,6 +210,46 @@ def query_groq_llm(messages, api_key):
     except Exception as e:
         return None
 
+# --- ENGINE 1B: GEMINI API (1.5 Flash - Free Key & BLOCK_NONE Safety) ---
+def query_gemini_llm(messages, api_key):
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+    headers = {"Content-Type": "application/json"}
+    
+    contents = []
+    system_instruction = None
+    
+    for msg in messages:
+        if msg["role"] == "system":
+            system_instruction = {"parts": [{"text": msg["content"]}]}
+        else:
+            role = "user" if msg["role"] == "user" else "model"
+            contents.append({"role": role, "parts": [{"text": msg["content"]}]})
+            
+    payload = {
+        "contents": contents,
+        "safetySettings": [
+            {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
+            {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+            {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+            {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"}
+        ],
+        "generationConfig": {
+            "temperature": 0.85,
+            "maxOutputTokens": 350
+        }
+    }
+    if system_instruction:
+        payload["systemInstruction"] = system_instruction
+        
+    data = json.dumps(payload).encode('utf-8')
+    req = urllib.request.Request(url, data=data, headers=headers, method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=12) as response:
+            res_body = json.loads(response.read().decode('utf-8'))
+            return res_body['candidates'][0]['content']['parts'][0]['text'].strip()
+    except Exception as e:
+        return None
+
 # --- ENGINE 2: POLLINATIONS AI (Fallback - 0 Key / Public API) ---
 def query_pollinations_llm(prompt_text):
     try:
@@ -326,11 +366,16 @@ Instruksi Tambahan:
 
     cfg = get_config()
     groq_key = cfg.get("groq_api_key", os.environ.get("GROQ_API_KEY", ""))
+    gemini_key = cfg.get("gemini_api_key", os.environ.get("GEMINI_API_KEY", ""))
 
     llm_output = None
     
-    # 1. Try Primary Engine: Groq API (if API Key provided)
-    if groq_key:
+    # 1A. Try Primary Engine A: Gemini API (if Gemini Key provided)
+    if gemini_key:
+        llm_output = query_gemini_llm(messages, gemini_key)
+
+    # 1B. Try Primary Engine B: Groq API (if Groq Key provided)
+    if not llm_output and groq_key:
         llm_output = query_groq_llm(messages, groq_key)
 
     # 2. Try Fallback Engine 1: Pollinations AI (0 Key / Public API)

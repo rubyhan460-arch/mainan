@@ -121,14 +121,36 @@ def api_get_facts():
 def api_manage_key():
     if request.method == 'POST':
         data = request.get_json() or {}
-        key = data.get('key', '').strip()
-        set_config('groq_api_key', key)
-        return jsonify({"status": "success", "has_key": bool(key)})
+        groq_key = data.get('groq_key', '').strip()
+        gemini_key = data.get('gemini_key', '').strip()
+        if groq_key:
+            set_config('groq_api_key', groq_key)
+        if gemini_key:
+            set_config('gemini_api_key', gemini_key)
+        return jsonify({"status": "success"})
     else:
         cfg = get_config()
-        has_key = bool(cfg.get('groq_api_key'))
-        key_preview = cfg.get('groq_api_key', '')[:8] + '...' if has_key else ''
-        return jsonify({"has_key": has_key, "key_preview": key_preview})
+        groq_key = cfg.get('groq_api_key', '')
+        gemini_key = cfg.get('gemini_api_key', '')
+        colab_url = cfg.get('colab_gpu_url', '')
+        return jsonify({
+            "has_groq_key": bool(groq_key),
+            "groq_preview": groq_key[:8] + '...' if groq_key else '',
+            "has_gemini_key": bool(gemini_key),
+            "gemini_preview": gemini_key[:8] + '...' if gemini_key else '',
+            "colab_gpu_url": colab_url
+        })
+
+@app.route('/api/colab_gpu', methods=['GET', 'POST'])
+def api_manage_colab_gpu():
+    if request.method == 'POST':
+        data = request.get_json() or {}
+        colab_url = data.get('colab_url', '').strip()
+        set_config('colab_gpu_url', colab_url)
+        return jsonify({"status": "success", "colab_url": colab_url})
+    else:
+        cfg = get_config()
+        return jsonify({"colab_url": cfg.get('colab_gpu_url', '')})
 
 if __name__ == '__main__':
     print("\n=======================================================")
