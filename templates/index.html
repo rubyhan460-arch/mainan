@@ -91,28 +91,28 @@
 
             <!-- VIEW 1: EXPLORE CARDS GALLERY GRID VIEW (SPICYCHAT STYLE) -->
             <section class="explore-view" id="exploreView">
-                <div class="explore-header">
+                <div class="explore-header explore-header-row">
                     <div>
                         <h1 class="explore-title">Explore Characters</h1>
                         <p class="explore-subtitle">Pilih karakter roleplay favoritmu untuk mulai bercakap-cakap</p>
                     </div>
-                    <div class="explore-search-bar">
+                    <div class="explore-search-bar explore-search-box">
                         <i class="fa-solid fa-magnifying-glass search-icon"></i>
                         <input type="text" id="inputSearchChar" placeholder="Cari nama karakter, tag, atau scenario...">
                     </div>
                 </div>
 
                 <!-- CATEGORY PILLS FILTER -->
-                <div class="category-pills" id="categoryPills">
-                    <button class="pill active" data-filter="all">Semua Tipe</button>
-                    <button class="pill" data-filter="nsfw"><i class="fa-solid fa-fire"></i> Uncensored (NSFW)</button>
-                    <button class="pill" data-filter="medium"><i class="fa-solid fa-heart"></i> Medium Ecchi</button>
-                    <button class="pill" data-filter="safe"><i class="fa-solid fa-shield-heart"></i> Safe /
+                <div class="category-pills category-pills-bar" id="categoryPills">
+                    <button class="pill cat-pill active" data-filter="all">Semua Tipe</button>
+                    <button class="pill cat-pill" data-filter="nsfw"><i class="fa-solid fa-fire"></i> Uncensored (NSFW)</button>
+                    <button class="pill cat-pill" data-filter="medium"><i class="fa-solid fa-heart"></i> Medium Ecchi</button>
+                    <button class="pill cat-pill" data-filter="safe"><i class="fa-solid fa-shield-heart"></i> Safe /
                         Strict</button>
                 </div>
 
                 <!-- CARDS GRID CONTAINER -->
-                <div class="spicy-grid" id="spicyGrid">
+                <div class="spicy-grid spicy-explore-grid" id="spicyGrid">
                     <!-- Dynamic SpicyChat-Style Character Cards Loaded via JS -->
                 </div>
             </section>

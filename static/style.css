@@ -1158,6 +1158,22 @@ body {
     color: var(--text-muted);
 }
 
+body {
+    font-family: var(--font-body);
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+}
+
+@media (min-width: 769px) {
+    body {
+        height: 100vh;
+        overflow: hidden;
+    }
+}
+
 .mobile-header-bar {
     display: none;
 }
@@ -1165,8 +1181,9 @@ body {
 .sidebar-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     z-index: 1000;
     transition: opacity 0.3s ease;
 }
@@ -1176,20 +1193,26 @@ body {
 }
 
 /* ========================================================= */
-/* 📱 MOBILE RESPONSIVE MEDIA QUERIES (SCREENS <= 768px)     */
+/* 📱 PERFECT MOBILE RESPONSIVE MEDIA QUERIES (<= 768px)     */
 /* ========================================================= */
 @media (max-width: 768px) {
+    body {
+        overflow-y: auto;
+    }
+
     .mobile-header-bar {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 10px 16px;
-        background: rgba(15, 10, 25, 0.95);
-        backdrop-filter: blur(12px);
+        padding: 10px 14px;
+        background: rgba(18, 12, 28, 0.95);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
         border-bottom: 1px solid var(--border-color);
         position: sticky;
         top: 0;
-        z-index: 99;
+        z-index: 999;
+        width: 100%;
     }
 
     .mobile-menu-btn,
@@ -1197,14 +1220,19 @@ body {
         background: rgba(255, 255, 255, 0.08);
         border: 1px solid var(--border-color);
         color: var(--text-main);
-        width: 38px;
-        height: 38px;
+        width: 40px;
+        height: 40px;
         border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 16px;
+        font-size: 17px;
         cursor: pointer;
+    }
+
+    .mobile-menu-btn:active,
+    .mobile-settings-btn:active {
+        transform: scale(0.95);
     }
 
     .mobile-brand {
@@ -1216,7 +1244,7 @@ body {
     .mobile-brand-title {
         font-family: 'Outfit', sans-serif;
         font-weight: 700;
-        font-size: 16px;
+        font-size: 15px;
         background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -1224,8 +1252,10 @@ body {
 
     .app-container {
         flex-direction: column;
+        width: 100%;
         height: auto;
-        min-height: calc(100vh - 59px);
+        min-height: calc(100vh - 60px);
+        position: relative;
     }
 
     /* MOBILE DRAWER SIDEBAR */
@@ -1234,14 +1264,19 @@ body {
         top: 0;
         left: 0;
         bottom: 0;
-        width: 280px;
+        width: 82vw;
+        max-width: 300px;
+        height: 100vh;
+        height: 100dvh;
         z-index: 1001;
         background: rgba(18, 12, 28, 0.98);
-        backdrop-filter: blur(16px);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
         transform: translateX(-100%);
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.8);
+        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.85);
         border-right: 1px solid var(--border-color);
+        overflow-y: auto;
     }
 
     .sidebar.mobile-open {
@@ -1249,105 +1284,214 @@ body {
     }
 
     .main-viewport {
-        padding: 12px;
+        padding: 12px 10px;
+        width: 100%;
         flex: 1;
+        overflow-y: visible;
+    }
+
+    /* EXPLORE VIEW MOBILE HEADER */
+    .explore-view {
+        max-width: 100%;
+    }
+
+    .explore-header,
+    .explore-header-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .explore-title {
+        font-size: 20px;
+    }
+
+    .explore-subtitle {
+        font-size: 12px;
+    }
+
+    .explore-search-bar,
+    .explore-search-box {
         width: 100%;
     }
 
-    /* MOBILE CARDS GRID */
+    .explore-search-bar input,
+    .explore-search-box input {
+        width: 100%;
+        padding: 10px 14px 10px 40px;
+        font-size: 14px;
+    }
+
+    /* CATEGORY PILLS BAR */
+    .category-pills,
+    .category-pills-bar {
+        gap: 8px;
+        padding-bottom: 8px;
+        margin-bottom: 14px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        white-space: nowrap;
+    }
+
+    .pill,
+    .cat-pill {
+        padding: 7px 14px;
+        font-size: 12px;
+        flex-shrink: 0;
+    }
+
+    /* SPICYCHAT CARDS GRID - 2 EQUAL COLUMNS ON MOBILE */
+    .spicy-grid,
     .spicy-explore-grid {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
         gap: 10px;
+        width: 100%;
+    }
+
+    .spicy-card {
+        width: 100%;
+        margin: 0;
     }
 
     .spicy-cover-box {
-        height: 170px;
+        height: 160px;
     }
 
     .spicy-card-body {
-        padding: 10px;
+        padding: 10px 8px;
     }
 
     .spicy-card-title {
-        font-size: 14px;
+        font-size: 13.5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .spicy-card-tagline {
         font-size: 11px;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
 
-    /* MOBILE CATEGORY PILLS BAR */
-    .category-pills-bar {
-        gap: 6px;
-        padding-bottom: 8px;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
+    .spicy-card-footer {
+        padding: 8px;
+        font-size: 10px;
     }
 
-    .cat-pill {
-        padding: 6px 12px;
-        font-size: 12px;
-        white-space: nowrap;
+    .spicy-tag-pill {
+        padding: 2px 6px;
+        font-size: 10px;
     }
 
-    /* MOBILE CHAT INTERFACE */
+    /* MOBILE CHAT ROOM INTERFACE */
     .chat-view {
-        height: calc(100vh - 83px);
+        height: calc(100vh - 61px);
+        height: calc(100dvh - 61px);
+        display: flex;
+        flex-direction: column;
     }
 
     .chat-header {
-        padding: 10px 12px;
-        flex-wrap: wrap;
+        padding: 8px 10px;
         gap: 8px;
-    }
-
-    .chat-header-info {
-        gap: 10px;
+        flex-shrink: 0;
     }
 
     .chat-avatar-box {
-        width: 36px;
-        height: 36px;
+        width: 38px;
+        height: 38px;
     }
 
     .chat-char-name {
-        font-size: 15px;
+        font-size: 14px;
     }
 
     .chat-char-sub {
         font-size: 11px;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .chat-header-actions {
+        gap: 6px;
+    }
+
+    .btn-header-action {
+        padding: 6px 10px;
+        font-size: 11px;
     }
 
     .messages-container {
-        padding: 12px 10px;
+        flex: 1;
+        padding: 10px 8px;
+        overflow-y: auto;
+    }
+
+    .message-row {
+        margin-bottom: 12px;
     }
 
     .message-bubble {
-        max-width: 90%;
-        font-size: 14px;
-        padding: 12px 14px;
+        max-width: 92%;
+        font-size: 13.5px;
+        padding: 10px 12px;
+        line-height: 1.45;
+    }
+
+    .rendered-ai-img {
+        max-width: 100%;
+        max-height: 250px;
+        border-radius: 12px;
     }
 
     .chat-input-area {
-        padding: 10px;
+        padding: 8px 10px;
+        position: sticky;
+        bottom: 0;
+        background: rgba(18, 12, 28, 0.98);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-top: 1px solid var(--border-color);
+        z-index: 10;
+    }
+
+    .input-wrapper {
+        gap: 8px;
     }
 
     .input-wrapper textarea {
         font-size: 14px;
         padding: 10px 12px;
-        min-height: 44px;
+        min-height: 42px;
+        max-height: 100px;
+        border-radius: 12px;
     }
 
     .send-btn {
-        width: 44px;
-        height: 44px;
-        font-size: 16px;
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        font-size: 15px;
+        flex-shrink: 0;
     }
 
     /* MOBILE MODALS */
     .modal-card {
-        width: 92vw;
-        max-width: 400px;
-        padding: 18px;
+        width: 94vw;
+        max-width: 380px;
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+    .modal-header h3 {
+        font-size: 16px;
     }
 }
