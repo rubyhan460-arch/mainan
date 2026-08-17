@@ -169,32 +169,52 @@ def get_dataset_images(char_id):
 
 @app.route('/api/generate_lora_image', methods=['POST'])
 def api_generate_lora_image():
+    import random
     data = request.get_json() or {}
     char_id = data.get('char_id', 'char')
     prompt = data.get('prompt', '')
     
-    # 1. Try Parquet Dataset Index (Fastest, 100% Accurate Tiers)
+    # 1. Try Parquet Dataset Index (Fastest, 100% Accurate Tiers, Dynamic Variety)
     ds_images = get_dataset_images(char_id)
     if ds_images:
         prompt_lower = prompt.lower()
-        matched_img = None
-        
-        # Match scenario keyword tags
-        keywords = ['mandi', 'bath', 'shower', 'kamar', 'bed', 'bedroom', 'pantai', 'beach', 'hot', 'swimsuit', 'bikini', 'panties']
-        for img_obj in ds_images:
-            tags = img_obj.get('tags', '').lower()
-            if any(k in prompt_lower for k in keywords):
-                if any(kw in tags for kw in ['bath', 'shower', 'bed', 'beach', 'swimsuit', 'bikini', 'cleavage', 'panties']):
-                    matched_img = img_obj.get('url')
-                    break
-        
-        if not matched_img and len(ds_images) > 0:
-            import random
-            top_pool = ds_images[:min(15, len(ds_images))]
-            matched_img = random.choice(top_pool).get('url')
+        cover_url = ds_images[0].get('url') if ds_images else ''
 
-        if matched_img:
-            return jsonify({"status": "success", "image_url": matched_img, "source": "parquet_dataset"})
+        # Scenario keywords map
+        keywords_map = {
+            'mandi': ['bath', 'shower', 'wet', 'towel', 'bathtub', 'water', 'onsen'],
+            'pantai': ['beach', 'sea', 'ocean', 'bikini', 'swimsuit', 'summer'],
+            'kamar': ['bed', 'bedroom', 'sheet', 'pillow', 'lying', 'room'],
+            'hot': ['cleavage', 'panties', 'underwear', 'lingerie', 'thighs', 'bare_shoulders', 'nude', 'bare_breasts', 'nipples', 'pussy', 'explicit'],
+            'pose': ['looking_at_viewer', 'blush', 'smile', 'seductive_smile', 'open_mouth', 'portrait']
+        }
+
+        matched_urls = []
+        for k, tag_list in keywords_map.items():
+            if k in prompt_lower or any(kw in prompt_lower for kw in tag_list):
+                for img_obj in ds_images:
+                    tags = img_obj.get('tags', '').lower()
+                    if any(t in tags for t in tag_list):
+                        u = img_obj.get('url')
+                        if u:
+                            matched_urls.append(u)
+
+        # Build fresh pool excluding cover image so chat photos are ALWAYS fresh & different
+        fresh_pool = [img.get('url') for img in ds_images[1:] if img.get('url') and img.get('url') != cover_url]
+        if not fresh_pool and ds_images:
+            fresh_pool = [img.get('url') for img in ds_images if img.get('url')]
+
+        chosen_url = None
+        if matched_urls:
+            valid_matched = [u for u in matched_urls if u != cover_url]
+            chosen_url = random.choice(valid_matched if valid_matched else matched_urls)
+        elif fresh_pool:
+            chosen_url = random.choice(fresh_pool)
+        elif ds_images:
+            chosen_url = ds_images[0].get('url')
+
+        if chosen_url:
+            return jsonify({"status": "success", "image_url": chosen_url, "source": "parquet_dataset"})
 
     # 2. Fallback to Colab GPU Engine if configured
     cfg = get_config()
