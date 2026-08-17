@@ -18,13 +18,30 @@
 </head>
 
 <body>
+    <!-- MOBILE TOP NAVBAR BAR -->
+    <header class="mobile-header-bar">
+        <button class="mobile-menu-btn" id="btnMobileMenuToggle" aria-label="Menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="mobile-brand">
+            <i class="fa-solid fa-fire-flame-curved brand-icon"></i>
+            <span class="mobile-brand-title">Chatbotmainanfarhan</span>
+        </div>
+        <button class="mobile-settings-btn" id="btnMobileOpenKey" aria-label="Settings">
+            <i class="fa-solid fa-sliders"></i>
+        </button>
+    </header>
+
+    <!-- MOBILE SIDEBAR BACKDROP OVERLAY -->
+    <div class="sidebar-backdrop hidden" id="sidebarBackdrop"></div>
+
     <div class="app-container">
         <!-- BACKGROUND AMBIENT LIGHTING -->
         <div class="ambient-glow bg-glow-1"></div>
         <div class="ambient-glow bg-glow-2"></div>
 
         <!-- SIDEBAR DRAWER -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="appSidebar">
             <div class="sidebar-header">
                 <div class="brand">
                     <i class="fa-solid fa-fire-flame-curved brand-icon"></i>

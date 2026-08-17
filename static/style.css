@@ -1158,6 +1158,196 @@ body {
     color: var(--text-muted);
 }
 
+.mobile-header-bar {
+    display: none;
+}
+
+.sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    transition: opacity 0.3s ease;
+}
+
 .hidden {
     display: none !important;
+}
+
+/* ========================================================= */
+/* 📱 MOBILE RESPONSIVE MEDIA QUERIES (SCREENS <= 768px)     */
+/* ========================================================= */
+@media (max-width: 768px) {
+    .mobile-header-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 16px;
+        background: rgba(15, 10, 25, 0.95);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border-color);
+        position: sticky;
+        top: 0;
+        z-index: 99;
+    }
+
+    .mobile-menu-btn,
+    .mobile-settings-btn {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .mobile-brand {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .mobile-brand-title {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 16px;
+        background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .app-container {
+        flex-direction: column;
+        height: auto;
+        min-height: calc(100vh - 59px);
+    }
+
+    /* MOBILE DRAWER SIDEBAR */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 280px;
+        z-index: 1001;
+        background: rgba(18, 12, 28, 0.98);
+        backdrop-filter: blur(16px);
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.8);
+        border-right: 1px solid var(--border-color);
+    }
+
+    .sidebar.mobile-open {
+        transform: translateX(0);
+    }
+
+    .main-viewport {
+        padding: 12px;
+        flex: 1;
+        width: 100%;
+    }
+
+    /* MOBILE CARDS GRID */
+    .spicy-explore-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 10px;
+    }
+
+    .spicy-cover-box {
+        height: 170px;
+    }
+
+    .spicy-card-body {
+        padding: 10px;
+    }
+
+    .spicy-card-title {
+        font-size: 14px;
+    }
+
+    .spicy-card-tagline {
+        font-size: 11px;
+    }
+
+    /* MOBILE CATEGORY PILLS BAR */
+    .category-pills-bar {
+        gap: 6px;
+        padding-bottom: 8px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .cat-pill {
+        padding: 6px 12px;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    /* MOBILE CHAT INTERFACE */
+    .chat-view {
+        height: calc(100vh - 83px);
+    }
+
+    .chat-header {
+        padding: 10px 12px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .chat-header-info {
+        gap: 10px;
+    }
+
+    .chat-avatar-box {
+        width: 36px;
+        height: 36px;
+    }
+
+    .chat-char-name {
+        font-size: 15px;
+    }
+
+    .chat-char-sub {
+        font-size: 11px;
+    }
+
+    .messages-container {
+        padding: 12px 10px;
+    }
+
+    .message-bubble {
+        max-width: 90%;
+        font-size: 14px;
+        padding: 12px 14px;
+    }
+
+    .chat-input-area {
+        padding: 10px;
+    }
+
+    .input-wrapper textarea {
+        font-size: 14px;
+        padding: 10px 12px;
+        min-height: 44px;
+    }
+
+    .send-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 16px;
+    }
+
+    /* MOBILE MODALS */
+    .modal-card {
+        width: 92vw;
+        max-width: 400px;
+        padding: 18px;
+    }
 }

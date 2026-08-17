@@ -184,9 +184,23 @@ def api_generate_lora_image():
         print(f"Colab GPU Proxy Error / Timeout: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
 
+import socket
+
+def get_local_ip():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return "127.0.0.1"
+
 if __name__ == '__main__':
+    local_ip = get_local_ip()
     print("\n=======================================================")
     print(" CHARACTER AI WEB APP - STARTING LOCAL FLASK SERVER")
-    print(" Open in browser: http://localhost:5000")
+    print(" Open in Laptop Browser  : http://localhost:5000")
+    print(f" Open in Phone (Wi-Fi)    : http://{local_ip}:5000")
     print("=======================================================\n")
     app.run(host='0.0.0.0', port=5000, debug=True)

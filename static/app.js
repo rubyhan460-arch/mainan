@@ -48,6 +48,44 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnCloseFacts = document.getElementById('btnCloseFacts');
     const factsGrid = document.getElementById('factsGrid');
 
+    // MOBILE DRAWER ELEMENTS
+    const btnMobileMenuToggle = document.getElementById('btnMobileMenuToggle');
+    const btnMobileOpenKey = document.getElementById('btnMobileOpenKey');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+    const appSidebar = document.getElementById('appSidebar');
+
+    function closeMobileSidebar() {
+        if (appSidebar) appSidebar.classList.remove('mobile-open');
+        if (sidebarBackdrop) sidebarBackdrop.classList.add('hidden');
+    }
+
+    function openMobileSidebar() {
+        if (appSidebar) appSidebar.classList.add('mobile-open');
+        if (sidebarBackdrop) sidebarBackdrop.classList.remove('hidden');
+    }
+
+    if (btnMobileMenuToggle) {
+        btnMobileMenuToggle.addEventListener('click', () => {
+            if (appSidebar && appSidebar.classList.contains('mobile-open')) {
+                closeMobileSidebar();
+            } else {
+                openMobileSidebar();
+            }
+        });
+    }
+
+    if (sidebarBackdrop) {
+        sidebarBackdrop.addEventListener('click', closeMobileSidebar);
+    }
+
+    if (btnMobileOpenKey) {
+        btnMobileOpenKey.addEventListener('click', () => {
+            closeMobileSidebar();
+            const modalKeyElem = document.getElementById('modalKey');
+            if (modalKeyElem) modalKeyElem.classList.remove('hidden');
+        });
+    }
+
     const modalKey = document.getElementById('modalKey');
     const btnOpenKey = document.getElementById('btnOpenKey');
     const btnCloseKey = document.getElementById('btnCloseKey');
@@ -126,6 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // VIEW SWITCHING
     function showExploreView() {
+        closeMobileSidebar();
         exploreView.classList.remove('hidden');
         chatView.classList.add('hidden');
         navExplore.classList.add('active');
@@ -133,6 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showChatView() {
+        closeMobileSidebar();
         exploreView.classList.add('hidden');
         chatView.classList.remove('hidden');
         navExplore.classList.remove('active');
@@ -287,6 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // OPEN CHAT VIEW FOR SELECTED CHARACTER
     async function openChatView(charId) {
+        closeMobileSidebar();
         const char = characters.find(c => c.id === charId);
         if (!char) return;
 
