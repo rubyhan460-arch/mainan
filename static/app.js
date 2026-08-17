@@ -199,12 +199,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const filtered = characters.filter(c => {
             const allowNsfw = c.allow_nsfw || false;
-            const strictness = c.strictness || 'low';
+            const strictness = c.strictness || (allowNsfw ? 'low' : 'high');
+
+            const isUncen = allowNsfw && (strictness === 'low' || strictness === 'uncensored');
+            const isMedium = allowNsfw && (strictness === 'medium');
+            const isSafe = !allowNsfw || strictness === 'high' || strictness === 'safe';
 
             // Filter Category Pill
-            if (currentFilter === 'nsfw' && !(allowNsfw && strictness === 'low')) return false;
-            if (currentFilter === 'medium' && strictness !== 'medium') return false;
-            if (currentFilter === 'safe' && allowNsfw) return false;
+            if (currentFilter === 'nsfw' && !isUncen) return false;
+            if (currentFilter === 'medium' && !isMedium) return false;
+            if (currentFilter === 'safe' && !isSafe) return false;
 
             // Filter Search Text
             if (searchQuery) {
@@ -229,14 +233,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const initial = c.name ? c.name.charAt(0).toUpperCase() : 'B';
             const allowNsfw = c.allow_nsfw || false;
-            const strictness = c.strictness || 'low';
+            const strictness = c.strictness || (allowNsfw ? 'low' : 'high');
+
+            const isUncen = allowNsfw && (strictness === 'low' || strictness === 'uncensored');
+            const isMedium = allowNsfw && (strictness === 'medium');
 
             let badgeClass = 'badge-safe';
             let badgeText = 'SAFE';
-            if (allowNsfw && strictness === 'low') {
+            if (isUncen) {
                 badgeClass = 'badge-nsfw';
                 badgeText = 'UNCENSORED';
-            } else if (strictness === 'medium') {
+            } else if (isMedium) {
                 badgeClass = 'badge-medium';
                 badgeText = 'MEDIUM';
             }

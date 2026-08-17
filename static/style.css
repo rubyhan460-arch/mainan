@@ -1158,13 +1158,18 @@ body {
     color: var(--text-muted);
 }
 
+html, body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden !important;
+}
+
 body {
     font-family: var(--font-body);
     background-color: var(--bg-dark);
     color: var(--text-main);
     min-height: 100vh;
     min-height: 100dvh;
-    overflow-x: hidden;
 }
 
 @media (min-width: 769px) {
@@ -1181,11 +1186,9 @@ body {
 .sidebar-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.45);
     z-index: 1000;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.25s ease;
 }
 
 .hidden {
@@ -1205,14 +1208,13 @@ body {
         align-items: center;
         justify-content: space-between;
         padding: 10px 14px;
-        background: rgba(18, 12, 28, 0.95);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
+        background: #160e24;
         border-bottom: 1px solid var(--border-color);
         position: sticky;
         top: 0;
         z-index: 999;
         width: 100%;
+        max-width: 100%;
     }
 
     .mobile-menu-btn,
@@ -1253,12 +1255,14 @@ body {
     .app-container {
         flex-direction: column;
         width: 100%;
+        max-width: 100%;
         height: auto;
         min-height: calc(100vh - 60px);
         position: relative;
+        overflow-x: hidden !important;
     }
 
-    /* MOBILE DRAWER SIDEBAR */
+    /* MOBILE DRAWER SIDEBAR (NO HEAVY BLUR) */
     .sidebar {
         position: fixed;
         top: 0;
@@ -1269,12 +1273,10 @@ body {
         height: 100vh;
         height: 100dvh;
         z-index: 1001;
-        background: rgba(18, 12, 28, 0.98);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
+        background: #170e28;
         transform: translateX(-100%);
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.85);
+        box-shadow: 6px 0 24px rgba(0, 0, 0, 0.65);
         border-right: 1px solid var(--border-color);
         overflow-y: auto;
     }
@@ -1286,13 +1288,16 @@ body {
     .main-viewport {
         padding: 12px 10px;
         width: 100%;
+        max-width: 100%;
         flex: 1;
-        overflow-y: visible;
+        overflow-x: hidden !important;
     }
 
     /* EXPLORE VIEW MOBILE HEADER */
     .explore-view {
+        width: 100%;
         max-width: 100%;
+        overflow-x: hidden !important;
     }
 
     .explore-header,
