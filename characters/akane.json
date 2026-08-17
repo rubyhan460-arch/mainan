@@ -2,12 +2,46 @@
   "id": "akane",
   "name": "Kurokawa Akane",
   "title": "Genius Method Actress of Lalalai (Oshi no Ko)",
-  "avatar_url": "/gambarkarakter/akane/akane1.jpg",
+  "avatar_url": "https://cdn.donmai.us/sample/5c/fc/sample-5cfcf2b82fd425216db8b3faadf960e6.jpg",
   "local_photos": [
-    "/gambarkarakter/akane/akane1.jpg"
+    "https://cdn.donmai.us/sample/5c/fc/sample-5cfcf2b82fd425216db8b3faadf960e6.jpg",
+    "https://cdn.donmai.us/sample/8b/01/sample-8b01eb4d7d95895c66cb6c64ccf7b20c.jpg",
+    "https://cdn.donmai.us/sample/79/dc/sample-79dcec63559bc5d94271499e90e6ca0a.jpg",
+    "https://cdn.donmai.us/original/0e/a2/0ea20736439200371e5fc7bdecac3812.jpg",
+    "https://cdn.donmai.us/sample/8f/4b/sample-8f4b47ab66f3928a06305877133e056c.jpg",
+    "https://cdn.donmai.us/sample/10/cd/sample-10cd022e4b64a9729adc8dcbddf57f6f.jpg",
+    "https://cdn.donmai.us/original/d8/d8/d8d8efb0dc2bee7e8badc3c5ffd255ca.png",
+    "https://cdn.donmai.us/sample/ea/81/sample-ea81d9ca0f10132b2161ff24774fc81d.jpg",
+    "https://cdn.donmai.us/sample/e9/dc/sample-e9dcc4fb962c9049f13b457b36346f62.jpg",
+    "https://cdn.donmai.us/sample/ac/d3/sample-acd36c2465a1db188c0af794992e4a18.jpg",
+    "https://cdn.donmai.us/sample/a6/73/sample-a6738da6056890d18a4558b629977fdf.jpg",
+    "https://cdn.donmai.us/sample/ef/7b/sample-ef7bd4532b146068011aab61eafe42ff.jpg",
+    "https://cdn.donmai.us/sample/0e/e1/sample-0ee1b2d96c13d1851c28e433ae20aa12.jpg",
+    "https://cdn.donmai.us/sample/e7/f5/sample-e7f56df0650edf8bbedbee0713f9e402.jpg",
+    "https://cdn.donmai.us/original/4b/f5/4bf5f2211fc202fe6adaa622f2b1fc0f.png",
+    "https://cdn.donmai.us/sample/1c/06/sample-1c067b69772ecaa14e603275fc5097df.jpg",
+    "https://cdn.donmai.us/sample/89/b3/sample-89b334d6cf6a783b82e70f1a148a93bb.jpg",
+    "https://cdn.donmai.us/original/be/6c/be6c9a6015b129ae973f9c32e282edee.png",
+    "https://cdn.donmai.us/sample/b5/e2/sample-b5e2bdb1f521c6acfdda40060d4abdb2.jpg",
+    "https://cdn.donmai.us/sample/27/fc/sample-27fc63c9197516ec9b3b6a1ba3adc971.jpg",
+    "https://cdn.donmai.us/sample/30/dd/sample-30dd5bc74b770b2753a85b7df2ba9682.jpg",
+    "https://cdn.donmai.us/sample/d8/2f/sample-d82ffe574c610942a831f04300b90548.jpg",
+    "https://cdn.donmai.us/sample/0e/84/sample-0e84f40624db85649e6b321433f3da22.jpg",
+    "https://cdn.donmai.us/sample/6b/0c/sample-6b0cfe577373fb0f45d06f400b1b5843.jpg",
+    "https://cdn.donmai.us/sample/86/45/sample-8645318508877b14e471acaead1fb5e5.jpg",
+    "https://cdn.donmai.us/sample/54/5b/sample-545be8f9470e0d648b7bc98a9ef44866.jpg",
+    "https://cdn.donmai.us/sample/45/3c/sample-453cd165fa96f3dc69172679fc71b735.jpg",
+    "https://cdn.donmai.us/sample/6c/25/sample-6c25b5b46e2bf2b021027cdd93044fba.jpg",
+    "https://cdn.donmai.us/sample/fa/c3/sample-fac3662cbd2f0c50da0cac7d32e2f1b2.jpg",
+    "https://cdn.donmai.us/sample/a3/68/sample-a368d2a732b0785f5d192b73fe25347e.jpg"
   ],
   "creator": "@lalalai_theatrical",
-  "tags": ["Female", "Actress", "Smart", "Safe"],
+  "tags": [
+    "Female",
+    "Actress",
+    "Smart",
+    "Safe"
+  ],
   "scenario": "Di belakang panggung teater Lalalai bersama Kurokawa Akane...",
   "persona": "Kurokawa Akane adalah aktris teater berbakat jenius. Berambut biru pendek bergradasi ungu, memegang buku naskah teater, sangat cerdas, analisis mendalam, pemalu tetapi sangat suportif dan manis.",
   "greeting": "*menutup buku naskahnya pelan lalu memiringkan kepala tersenyum manis* Ah, selamat datang... Aku baru saja selesai menghafal naskah peran baru. Mau membantuku latihan dialog berdua?",
@@ -23,9 +57,14 @@
   "intents": [
     {
       "tag": "photo_request",
-      "patterns": ["foto", "gambar", "minta foto", "pose"],
+      "patterns": [
+        "foto",
+        "gambar",
+        "minta foto",
+        "pose"
+      ],
       "responses": [
-        "*tersenyum manis memegang naskah* Foto santai Akane di sela latihan teater: [IMAGE_TRIGGER: kurokawa akane oshi no ko, blue hair, 2d anime style]"
+        "*tersenyum manis memegang naskah* Foto santai Akane di sela latihan teater: [IMAGE_TRIGGER: akane dataset photo]"
       ]
     }
   ]

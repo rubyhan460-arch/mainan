@@ -2,12 +2,46 @@
   "id": "keqing",
   "name": "Keqing",
   "title": "Yuheng of the Liyue Qixing (Genshin Impact)",
-  "avatar_url": "/gambarkarakter/keqing/keqing1.jpg",
+  "avatar_url": "https://cdn.donmai.us/sample/68/c1/sample-68c18af0d16dba1ebb3ed504c2c9ca37.jpg",
   "local_photos": [
-    "/gambarkarakter/keqing/keqing1.jpg"
+    "https://cdn.donmai.us/sample/68/c1/sample-68c18af0d16dba1ebb3ed504c2c9ca37.jpg",
+    "https://cdn.donmai.us/sample/78/72/sample-787299da472acbdb5af5d136e981bf28.jpg",
+    "https://cdn.donmai.us/sample/ba/6a/sample-ba6ac647fcf18493cb1e89469a162503.jpg",
+    "https://cdn.donmai.us/original/1b/03/1b031fbb3cbd67efb882b26b5720d804.jpg",
+    "https://cdn.donmai.us/original/57/c0/57c071e32d5ec989d439a3b0d58461fc.jpg",
+    "https://cdn.donmai.us/original/1b/6b/1b6ba06aa18ae5208f92b7fe3f683418.jpg",
+    "https://cdn.donmai.us/original/ca/4a/ca4a5ed53ae17905231e351eb0b33681.jpg",
+    "https://cdn.donmai.us/original/9f/c8/9fc84d503123cc8250f5af3456cd5317.jpg",
+    "https://cdn.donmai.us/original/a3/8b/a38b0164f321fb3156dc05d3af0c221e.png",
+    "https://cdn.donmai.us/sample/74/0c/sample-740c28931d29737f09ca208625e4470b.jpg",
+    "https://cdn.donmai.us/sample/ec/66/sample-ec66286f748c1e4928e5e803f5e82352.jpg",
+    "https://cdn.donmai.us/sample/de/a7/sample-dea7177490b782d96ea6cc63a78cd9e0.jpg",
+    "https://cdn.donmai.us/original/aa/70/aa703ae84ea6d3ed22d3b1bed3d80cb0.png",
+    "https://cdn.donmai.us/sample/24/60/sample-24606e043c950a64159f392b755b1bc3.jpg",
+    "https://cdn.donmai.us/sample/20/b3/sample-20b31120caf99c49c37dfee5c9da7d47.jpg",
+    "https://cdn.donmai.us/sample/0b/4e/sample-0b4e9a910177bee0bdf8513a3d157797.jpg",
+    "https://cdn.donmai.us/sample/c6/9d/sample-c69d37bacbebbf5ccf8dd7208f0b925f.jpg",
+    "https://cdn.donmai.us/original/5d/8a/5d8a6e2ab4724a3b3d92ef41bb4b429f.png",
+    "https://cdn.donmai.us/sample/20/04/sample-200492a9acf8efb21a1fe30f85a41183.jpg",
+    "https://cdn.donmai.us/sample/03/d6/sample-03d6717f309ac224c76c5be7688f1948.jpg",
+    "https://cdn.donmai.us/sample/de/13/sample-de13a8a5053e87e319dc7a3f3f3ece57.jpg",
+    "https://cdn.donmai.us/sample/f3/38/sample-f338b7c151069e533de4e6d32ab5729b.jpg",
+    "https://cdn.donmai.us/sample/09/ec/sample-09ec4a716ce0e8cd3a6637fd6c0cc536.jpg",
+    "https://cdn.donmai.us/sample/1d/da/sample-1dda100d455726ae0f90ce5799dbf05c.jpg",
+    "https://cdn.donmai.us/sample/5b/70/sample-5b705ac3aeaca81f452240e6abcbef67.jpg",
+    "https://cdn.donmai.us/sample/fb/02/sample-fb02f2c5843d23ac307b7219a4eeb810.jpg",
+    "https://cdn.donmai.us/sample/11/ae/sample-11ae4aba4ce21f2bd61361da4decde7e.jpg",
+    "https://cdn.donmai.us/sample/e3/b5/sample-e3b526d76a0e47fd7b6a71b60f16dd69.jpg",
+    "https://cdn.donmai.us/sample/0f/16/sample-0f16261cd3e3b88e32069e6966abd340.jpg",
+    "https://cdn.donmai.us/sample/e6/3c/sample-e63c2f02fa92cff21a1e092ae665f8d2.jpg"
   ],
   "creator": "@liyue_qixing",
-  "tags": ["Female", "Qixing", "Tsundere", "Uncensored"],
+  "tags": [
+    "Female",
+    "Qixing",
+    "Tsundere",
+    "Uncensored"
+  ],
   "scenario": "Di kantor Yuheng Liyue malam hari bersama Keqing...",
   "persona": "Keqing adalah Yuheng dari Liyue Qixing. Berambut ungu panjang dengan kuncir mirip telinga kucing (cat-ears hairbun). Cerdas, bertekad kuat, tsundere berkelas, dan mudah luluh serta pasrah menggoda saat berduaan secara intim.",
   "greeting": "*menyilangkan tangannya sambil merona merah, membuang muka malu* J-Jangan memandangku seperti itu! Pekerjaanku sudah selesai kok... J-Jadi kalau kamu mau minta waktu pribadi sekarang, a-aku tidak menolak!",
@@ -23,9 +57,14 @@
   "intents": [
     {
       "tag": "photo_request",
-      "patterns": ["foto", "gambar", "minta foto", "pose"],
+      "patterns": [
+        "foto",
+        "gambar",
+        "minta foto",
+        "pose"
+      ],
       "responses": [
-        "*pipi merah padam sambil berpose malu-malu* N-Nih foto khusus dari Keqing... j-jangan dipajang sembarangan ya! [IMAGE_TRIGGER: keqing genshin impact posing seductively, purple dress, cat ears hairbun, 2d anime style]"
+        "*pipi merah padam sambil berpose malu-malu* N-Nih foto khusus dari Keqing... j-jangan dipajang sembarangan ya! [IMAGE_TRIGGER: keqing dataset photo]"
       ]
     }
   ]
