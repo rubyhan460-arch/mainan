@@ -86,6 +86,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Close sidebar when clicking anywhere outside on mobile
+    document.addEventListener('click', (e) => {
+        if (appSidebar && appSidebar.classList.contains('mobile-open')) {
+            const isClickInsideSidebar = appSidebar.contains(e.target);
+            const isClickToggleBtn = btnMobileMenuToggle && btnMobileMenuToggle.contains(e.target);
+            if (!isClickInsideSidebar && !isClickToggleBtn) {
+                closeMobileSidebar();
+            }
+        }
+    });
+
     const modalKey = document.getElementById('modalKey');
     const btnOpenKey = document.getElementById('btnOpenKey');
     const btnCloseKey = document.getElementById('btnCloseKey');
