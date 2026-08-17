@@ -6,7 +6,7 @@ import pyarrow.compute as pc
 
 def main():
     print("=======================================================")
-    print(" STRICT PARQUET DATASET INDEXER (PRECISE DANBOORU TAGS)")
+    print(" SOLO PORTRAIT PARQUET DATASET INDEXER (NO MULTI-GIRL / DOUJIN)")
     print("=======================================================")
 
     parquet_path = os.path.join("dataset", "metadata.parquet")
@@ -16,7 +16,6 @@ def main():
         print(f"Error: {parquet_path} not found!")
         return
 
-    # STRICT DANBOORU CHARACTER TAG MAP
     char_map = {
         "tsunade": {"pattern": "tsunade", "tier": "uncensored"},
         "rias": {"pattern": "rias_gremory", "tier": "uncensored"},
@@ -55,7 +54,7 @@ def main():
     start_time = time.time()
     print("Loading Parquet Dataset into Memory...")
     dset = ds.dataset(parquet_path, format="parquet")
-    cols = ["tag_string_character", "rating", "file_url", "large_file_url", "preview_file_url", "score", "tag_string_general"]
+    cols = ["tag_string_character", "tag_count_character", "rating", "file_url", "large_file_url", "preview_file_url", "score", "tag_string_general"]
     
     results = {char_id: [] for char_id in char_map}
     total_scanned = 0
@@ -63,6 +62,27 @@ def main():
     for batch in dset.to_batches(columns=cols):
         total_scanned += batch.num_rows
         char_tags = batch.column("tag_string_character")
+        char_count = batch.column("tag_count_character")
+        gen_tags = batch.column("tag_string_general")
+
+        # FILTER 1: Must be SOLO girl (tag_count_character == 1 and 1girl in general tags)
+        solo_mask = pc.and_(
+            pc.equal(char_count, 1),
+            pc.match_substring_regex(gen_tags, "(1girl|solo)", ignore_case=True)
+        )
+
+        # FILTER 2: Exclude doujin pages, comic text, feet focus, multiple girls, side characters
+        clean_mask = pc.invert(
+            pc.match_substring_regex(gen_tags, "(comic|manga|monochrome|greyscale|feet_out|multiple_girls|text_focus|translated|speech_bubble|wordless|group|harem)", ignore_case=True)
+        )
+
+        valid_batch_mask = pc.and_(solo_mask, clean_mask)
+        filtered_batch = batch.filter(valid_batch_mask)
+
+        if filtered_batch.num_rows == 0:
+            continue
+
+        f_char_tags = filtered_batch.column("tag_string_character")
 
         for char_id, info in char_map.items():
             if len(results[char_id]) >= 80:
@@ -72,8 +92,8 @@ def main():
             allowed = tier_ratings[info["tier"]]
 
             # Vectorized regex match
-            mask = pc.match_substring_regex(char_tags, pat, ignore_case=True)
-            sub_table = batch.filter(mask)
+            mask = pc.match_substring_regex(f_char_tags, pat, ignore_case=True)
+            sub_table = filtered_batch.filter(mask)
 
             if sub_table.num_rows > 0:
                 sub_dict = sub_table.to_pydict()
@@ -86,7 +106,11 @@ def main():
                     if not img:
                         continue
 
-                    gen_tags = str(sub_dict["tag_string_general"][i] or "").lower()
+                    g_str = str(sub_dict["tag_string_general"][i] or "").lower()
+
+                    # Additional strict checks for clean solo portrait
+                    if any(bad in g_str for bad in ["comic", "monochrome", "feet", "multiple", "text", "speech"]):
+                        continue
 
                     if len(results[char_id]) < 80:
                         results[char_id].append({
@@ -94,18 +118,18 @@ def main():
                             "preview": sub_dict["preview_file_url"][i] or img,
                             "rating": rate,
                             "score": sub_dict["score"][i] or 0,
-                            "tags": gen_tags[:150]
+                            "tags": g_str[:150]
                         })
 
-    # Sort each character's images by score descending so top cover image is highest score masterpiece
+    # Sort each character's images by score descending so top cover image is highest score solo portrait
     for char_id in results:
         results[char_id].sort(key=lambda x: x["score"], reverse=True)
 
     elapsed = round(time.time() - start_time, 2)
-    print(f"\nIndexing complete in {elapsed}s! Scanned {total_scanned} rows.")
+    print(f"\nSolo Portrait Indexing complete in {elapsed}s! Scanned {total_scanned} rows.")
     for char_id, items in results.items():
         tier = char_map[char_id]["tier"].upper()
-        print(f"  - {char_id} ({tier}): {len(items)} dataset images indexed (Top Score: {items[0]['score'] if items else 0})")
+        print(f"  - {char_id} ({tier}): {len(items)} solo dataset images indexed (Top Score: {items[0]['score'] if items else 0})")
 
     # Save index JSON
     with open(output_index_path, "w", encoding="utf-8") as f:
