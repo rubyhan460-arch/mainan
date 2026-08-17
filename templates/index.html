@@ -23,10 +23,10 @@
         <button class="mobile-menu-btn" id="btnMobileMenuToggle" aria-label="Menu">
             <i class="fa-solid fa-bars"></i>
         </button>
-        <div class="mobile-brand">
+        <a href="/" class="mobile-brand" id="mobileBrandHome">
             <i class="fa-solid fa-fire-flame-curved brand-icon"></i>
             <span class="mobile-brand-title">Chatbotmainanfarhan</span>
-        </div>
+        </a>
         <button class="mobile-settings-btn" id="btnMobileOpenKey" aria-label="Settings">
             <i class="fa-solid fa-sliders"></i>
         </button>
@@ -43,13 +43,13 @@
         <!-- SIDEBAR DRAWER -->
         <aside class="sidebar" id="appSidebar">
             <div class="sidebar-header">
-                <div class="brand">
+                <a href="/" class="brand" id="brandLogoHome">
                     <i class="fa-solid fa-fire-flame-curved brand-icon"></i>
                     <div>
                         <h2 class="brand-title">Chatbotmainanfarhan</h2>
                         <span class="brand-subtitle">Personal AI Roleplay</span>
                     </div>
-                </div>
+                </a>
             </div>
 
             <!-- NAVIGATION MENU -->
@@ -105,8 +105,10 @@
                 <!-- CATEGORY PILLS FILTER -->
                 <div class="category-pills category-pills-bar" id="categoryPills">
                     <button class="pill cat-pill active" data-filter="all">Semua Tipe</button>
-                    <button class="pill cat-pill" data-filter="nsfw"><i class="fa-solid fa-fire"></i> Uncensored (NSFW)</button>
-                    <button class="pill cat-pill" data-filter="medium"><i class="fa-solid fa-heart"></i> Medium Ecchi</button>
+                    <button class="pill cat-pill" data-filter="nsfw"><i class="fa-solid fa-fire"></i> Uncensored
+                        (NSFW)</button>
+                    <button class="pill cat-pill" data-filter="medium"><i class="fa-solid fa-heart"></i> Medium
+                        Ecchi</button>
                     <button class="pill cat-pill" data-filter="safe"><i class="fa-solid fa-shield-heart"></i> Safe /
                         Strict</button>
                 </div>
@@ -216,10 +218,12 @@
                 <button class="close-modal-btn" id="btnCloseKey">&times;</button>
             </div>
             <div class="modal-body">
-                <p class="modal-desc">Atur API Key LLM Teks (Gemini 1.5 Flash / Groq) dan URL Colab GPU Tunnel untuk Generasi Gambar 2D Anime LoRA:</p>
-                
+                <p class="modal-desc">Atur API Key LLM Teks (Gemini 1.5 Flash / Groq) dan URL Colab GPU Tunnel untuk
+                    Generasi Gambar 2D Anime LoRA:</p>
+
                 <div class="settings-section">
-                    <label class="setting-label"><strong>✨ Gemini 1.5 Flash API Key (Primary - BLOCK_NONE Safety):</strong></label>
+                    <label class="setting-label"><strong>✨ Gemini 1.5 Flash API Key (Primary - BLOCK_NONE
+                            Safety):</strong></label>
                     <div class="input-group">
                         <input type="password" id="inputGeminiKey" placeholder="AIzaSy..." autocomplete="off">
                     </div>
@@ -233,13 +237,16 @@
                 </div>
 
                 <div class="settings-section" style="margin-top: 12px;">
-                    <label class="setting-label"><strong>🚀 Colab GPU Tunnel URL (Free NVIDIA T4 GPU Engine):</strong></label>
+                    <label class="setting-label"><strong>🚀 Colab GPU Tunnel URL (Free NVIDIA T4 GPU
+                            Engine):</strong></label>
                     <div class="input-group">
-                        <input type="text" id="inputColabUrl" placeholder="https://xxxx.loca.lt atau ngrok URL..." autocomplete="off">
+                        <input type="text" id="inputColabUrl" placeholder="https://xxxx.loca.lt atau ngrok URL..."
+                            autocomplete="off">
                     </div>
                 </div>
 
-                <button class="btn-primary" id="btnSaveKey" style="width: 100%; margin-top: 16px;">Simpan Semua Pengaturan</button>
+                <button class="btn-primary" id="btnSaveKey" style="width: 100%; margin-top: 16px;">Simpan Semua
+                    Pengaturan</button>
 
                 <div class="key-status-box" id="keyStatusBox" style="margin-top: 14px;">
                     <!-- Status loaded via JS -->

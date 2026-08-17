@@ -173,10 +173,20 @@ body {
     border-bottom: 1px solid var(--border-color);
 }
 
-.brand {
+.brand,
+.mobile-brand {
     display: flex;
     align-items: center;
     gap: 12px;
+    text-decoration: none !important;
+    color: inherit;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.brand:hover,
+.mobile-brand:hover {
+    opacity: 0.85;
 }
 
 .brand-icon {

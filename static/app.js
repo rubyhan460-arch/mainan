@@ -182,6 +182,23 @@ document.addEventListener('DOMContentLoaded', () => {
         navActiveChat.classList.remove('active');
     }
 
+    const brandLogoHome = document.getElementById('brandLogoHome');
+    const mobileBrandHome = document.getElementById('mobileBrandHome');
+
+    if (brandLogoHome) {
+        brandLogoHome.addEventListener('click', (e) => {
+            e.preventDefault();
+            showExploreView();
+        });
+    }
+
+    if (mobileBrandHome) {
+        mobileBrandHome.addEventListener('click', (e) => {
+            e.preventDefault();
+            showExploreView();
+        });
+    }
+
     function showChatView() {
         closeMobileSidebar();
         exploreView.classList.add('hidden');
@@ -264,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const scenario = c.scenario || c.persona.substring(0, 70) + '...';
             const avatarUrl = c.avatar_url || '';
 
-            const coverHTML = avatarUrl 
+            const coverHTML = avatarUrl
                 ? `<img src="${avatarUrl}" class="spicy-cover-img" alt="${c.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                    <div class="spicy-cover-initial" style="display:none;">${initial}</div>`
                 : `<div class="spicy-cover-initial">${initial}</div>`;
@@ -319,7 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 badgeText = 'MEDIUM';
             }
 
-            const avatarHTML = avatarUrl 
+            const avatarHTML = avatarUrl
                 ? `<img src="${avatarUrl}" alt="${c.name}" onerror="this.parentNode.innerHTML='${initial}'">`
                 : initial;
 
