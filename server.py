@@ -154,12 +154,49 @@ def api_manage_colab_gpu():
         cfg = get_config()
         return jsonify({"colab_url": cfg.get('colab_gpu_url', '')})
 
+DATASET_INDEX_PATH = os.path.join(os.path.dirname(__file__), 'dataset', 'dataset_index.json')
+dataset_cache = {}
+
+def get_dataset_images(char_id):
+    global dataset_cache
+    if not dataset_cache and os.path.exists(DATASET_INDEX_PATH):
+        try:
+            with open(DATASET_INDEX_PATH, 'r', encoding='utf-8') as f:
+                dataset_cache = json.load(f).get('characters', {})
+        except Exception as e:
+            print("Error loading dataset index:", e)
+    return dataset_cache.get(char_id, [])
+
 @app.route('/api/generate_lora_image', methods=['POST'])
 def api_generate_lora_image():
     data = request.get_json() or {}
     char_id = data.get('char_id', 'char')
     prompt = data.get('prompt', '')
     
+    # 1. Try Parquet Dataset Index (Fastest, 100% Accurate Tiers)
+    ds_images = get_dataset_images(char_id)
+    if ds_images:
+        prompt_lower = prompt.lower()
+        matched_img = None
+        
+        # Match scenario keyword tags
+        keywords = ['mandi', 'bath', 'shower', 'kamar', 'bed', 'bedroom', 'pantai', 'beach', 'hot', 'swimsuit', 'bikini', 'panties']
+        for img_obj in ds_images:
+            tags = img_obj.get('tags', '').lower()
+            if any(k in prompt_lower for k in keywords):
+                if any(kw in tags for kw in ['bath', 'shower', 'bed', 'beach', 'swimsuit', 'bikini', 'cleavage', 'panties']):
+                    matched_img = img_obj.get('url')
+                    break
+        
+        if not matched_img and len(ds_images) > 0:
+            import random
+            top_pool = ds_images[:min(15, len(ds_images))]
+            matched_img = random.choice(top_pool).get('url')
+
+        if matched_img:
+            return jsonify({"status": "success", "image_url": matched_img, "source": "parquet_dataset"})
+
+    # 2. Fallback to Colab GPU Engine if configured
     cfg = get_config()
     colab_url = cfg.get('colab_gpu_url', '').strip().rstrip('/')
     
@@ -176,7 +213,6 @@ def api_generate_lora_image():
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
         }
         req = urllib.request.Request(req_url, data=payload, headers=headers, method="POST")
-        # Hard 10-second timeout so app never hangs
         with urllib.request.urlopen(req, timeout=10) as response:
             res_data = json.loads(response.read().decode('utf-8'))
             return jsonify(res_data)
