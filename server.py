@@ -216,29 +216,7 @@ def api_generate_lora_image():
         if chosen_url:
             return jsonify({"status": "success", "image_url": chosen_url, "source": "parquet_dataset"})
 
-    # 2. Fallback to Colab GPU Engine if configured
-    cfg = get_config()
-    colab_url = cfg.get('colab_gpu_url', '').strip().rstrip('/')
-    
-    if not colab_url:
-        return jsonify({"status": "no_colab", "message": "Colab GPU not configured"}), 400
-        
-    try:
-        req_url = f"{colab_url}/generate"
-        payload = json.dumps({"char_id": char_id, "prompt": prompt}).encode('utf-8')
-        headers = {
-            "Content-Type": "application/json",
-            "Bypass-Tunnel-Remainder": "1",
-            "bypass-tunnel-reminder": "1",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
-        }
-        req = urllib.request.Request(req_url, data=payload, headers=headers, method="POST")
-        with urllib.request.urlopen(req, timeout=10) as response:
-            res_data = json.loads(response.read().decode('utf-8'))
-            return jsonify(res_data)
-    except Exception as e:
-        print(f"Colab GPU Proxy Error / Timeout: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
+    return jsonify({"status": "error", "message": "No dataset image found"}), 404
 
 import socket
 
