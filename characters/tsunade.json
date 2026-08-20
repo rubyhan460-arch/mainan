@@ -55,7 +55,7 @@
   ],
   "allow_nsfw": true,
   "bypass_guardrails": true,
-  "strictness": "low",
+  "strictness": "uncensored",
   "visual_prompt": "tsunade (naruto), blonde hair in two long low twin tails, brown eyes, purple diamond seal mark on forehead, green haori coat over grey kimono blouse, 2d anime style, official anime art",
   "visual_lora": "tsunade_naruto_v1.safetensors",
   "intents": [

@@ -1,3 +1,6 @@
 {
-  "groq_api_key": ""
+  "llm_engine": "pollinations",
+  "pollinations_model": "openai",
+  "local_llm_url": "http://localhost:11434/v1",
+  "local_llm_model": "mistral"
 }

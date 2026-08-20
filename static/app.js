@@ -1,5 +1,5 @@
 /* ==========================================================================
-   SPICYSTUDIO - PERSONAL AI ROLEPLAY CLIENT LOGIC (SPICYCHAT CARDS & LIVE AI IMAGES)
+   SPICYSTUDIO - PERSONAL AI ROLEPLAY CLIENT LOGIC (UNCENSORED ENGINE & DYNAMIC DATASET IMAGES)
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeChar = null;
     let isSending = false;
     let currentFilter = 'all';
+    let sessionImageHistory = {}; // char_id -> [urls] to prevent duplicate images in same session
 
     // DOM VIEWS
     const exploreView = document.getElementById('exploreView');
@@ -31,10 +32,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnSend = document.getElementById('btnSend');
     const typingIndicator = document.getElementById('typingIndicator');
     const typingText = document.getElementById('typingText');
+    const activeEngineBadge = document.getElementById('activeEngineBadge');
 
     // HEADER ELEMENTS
     const headerAvatarWrapper = document.getElementById('headerAvatarWrapper');
-    const headerAvatarFallback = document.getElementById('headerAvatarFallback');
     const headerCharName = document.getElementById('headerCharName');
     const headerCharTitle = document.getElementById('headerCharTitle');
     const headerBadge = document.getElementById('headerBadge');
@@ -47,6 +48,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnOpenFacts = document.getElementById('btnOpenFacts');
     const btnCloseFacts = document.getElementById('btnCloseFacts');
     const factsGrid = document.getElementById('factsGrid');
+
+    const modalKey = document.getElementById('modalKey');
+    const btnOpenKey = document.getElementById('btnOpenKey');
+    const btnCloseKey = document.getElementById('btnCloseKey');
+    const selectLlmEngine = document.getElementById('selectLlmEngine');
+    const inputGeminiKey = document.getElementById('inputGeminiKey');
+    const inputGeminiModel = document.getElementById('inputGeminiModel');
+    const inputPollinationsModel = document.getElementById('inputPollinationsModel');
+    const inputLocalUrl = document.getElementById('inputLocalUrl');
+    const inputLocalModel = document.getElementById('inputLocalModel');
+    const btnSaveKey = document.getElementById('btnSaveKey');
+    const keyStatusBox = document.getElementById('keyStatusBox');
+    const sectionGemini = document.getElementById('sectionGemini');
+    const sectionPollinations = document.getElementById('sectionPollinations');
+    const sectionLocalLlm = document.getElementById('sectionLocalLlm');
+
+    // LIGHTBOX ELEMENTS
+    const modalLightbox = document.getElementById('modalLightbox');
+    const btnCloseLightbox = document.getElementById('btnCloseLightbox');
+    const lightboxImg = document.getElementById('lightboxImg');
+    const lightboxCaption = document.getElementById('lightboxCaption');
 
     // MOBILE DRAWER ELEMENTS
     const btnMobileMenuToggle = document.getElementById('btnMobileMenuToggle');
@@ -81,12 +103,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnMobileOpenKey) {
         btnMobileOpenKey.addEventListener('click', () => {
             closeMobileSidebar();
-            const modalKeyElem = document.getElementById('modalKey');
-            if (modalKeyElem) modalKeyElem.classList.remove('hidden');
+            openKeyModal();
         });
     }
 
-    // Close sidebar when clicking anywhere outside on mobile
     document.addEventListener('click', (e) => {
         if (appSidebar && appSidebar.classList.contains('mobile-open')) {
             const isClickInsideSidebar = appSidebar.contains(e.target);
@@ -97,19 +117,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const modalKey = document.getElementById('modalKey');
-    const btnOpenKey = document.getElementById('btnOpenKey');
-    const btnCloseKey = document.getElementById('btnCloseKey');
-    const inputGroqKey = document.getElementById('inputGroqKey');
-    const btnSaveKey = document.getElementById('btnSaveKey');
-    const keyStatusBox = document.getElementById('keyStatusBox');
+    // LIGHTBOX HELPERS
+    function openLightbox(src, captionText) {
+        if (!modalLightbox || !lightboxImg) return;
+        lightboxImg.src = src;
+        if (lightboxCaption) lightboxCaption.textContent = captionText || '';
+        modalLightbox.classList.remove('hidden');
+    }
+
+    function closeLightbox() {
+        if (!modalLightbox) return;
+        modalLightbox.classList.add('hidden');
+        if (lightboxImg) lightboxImg.src = '';
+    }
+
+    if (btnCloseLightbox) {
+        btnCloseLightbox.addEventListener('click', closeLightbox);
+    }
+    if (modalLightbox) {
+        modalLightbox.addEventListener('click', (e) => {
+            if (e.target === modalLightbox) closeLightbox();
+        });
+    }
 
     // INITIALIZATION
     init();
 
     async function init() {
         await loadCharacters();
-        await checkApiKeyStatus();
+        await checkSettingsStatus();
         setupEventListeners();
     }
 
@@ -124,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // CLOSE CHAT BUTTON -> Exit Chat Room & Return to Cards Grid
+        // Close Chat Button
         btnCloseChat.addEventListener('click', () => {
             showExploreView();
         });
@@ -153,58 +189,83 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Clear history button
+        // Auto-expand textarea
+        messageInput.addEventListener('input', () => {
+            messageInput.style.height = 'auto';
+            messageInput.style.height = Math.min(messageInput.scrollHeight, 120) + 'px';
+        });
+
+        // Clear History
         btnClearHistory.addEventListener('click', handleClearHistory);
 
-        // Modals
+        // Facts Modal
         btnOpenFacts.addEventListener('click', openFactsModal);
         btnCloseFacts.addEventListener('click', () => modalFacts.classList.add('hidden'));
 
+        // Settings Modal
         btnOpenKey.addEventListener('click', openKeyModal);
         btnCloseKey.addEventListener('click', () => modalKey.classList.add('hidden'));
-        btnSaveKey.addEventListener('click', handleSaveKey);
+        btnSaveKey.addEventListener('click', handleSaveSettings);
 
-        // Close modal on overlay click
-        modalFacts.addEventListener('click', (e) => {
-            if (e.target === modalFacts) modalFacts.classList.add('hidden');
-        });
-        modalKey.addEventListener('click', (e) => {
-            if (e.target === modalKey) modalKey.classList.add('hidden');
-        });
+        // Affinity Score Click to Edit
+        const affinityMeterBox = document.querySelector('.affinity-meter-box');
+        if (affinityMeterBox) {
+            affinityMeterBox.style.cursor = 'pointer';
+            affinityMeterBox.title = 'Klik untuk mengubah Affinity Score (0-100)';
+            affinityMeterBox.addEventListener('click', async () => {
+                if (!activeChar) return;
+                const current = activeChar.current_affinity || 10;
+                const inputVal = prompt(`Ubah Affinity Score untuk ${activeChar.name} (0 - 100):`, current);
+                if (inputVal === null) return;
+                const num = parseInt(inputVal, 10);
+                if (isNaN(num) || num < 0 || num > 100) {
+                    alert('Masukkan angka antara 0 sampai 100.');
+                    return;
+                }
+                try {
+                    const res = await fetch(`/api/affinity/${activeChar.id}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ score: num })
+                    });
+                    const data = await res.json();
+                    if (data.status === 'success') {
+                        activeChar.current_affinity = data.affinity_score;
+                        headerAffinityScore.textContent = `${data.affinity_score}/100`;
+                        headerAffinityBar.style.width = `${data.affinity_score}%`;
+                        renderSidebarList();
+                        renderSpicyGrid();
+                    }
+                } catch (err) {
+                    console.error("Error updating affinity score:", err);
+                }
+            });
+        }
+
+        if (selectLlmEngine) {
+            selectLlmEngine.addEventListener('change', () => {
+                const engine = selectLlmEngine.value;
+                if (sectionGemini) sectionGemini.style.display = engine === 'gemini' ? 'block' : 'none';
+                if (sectionLocalLlm) sectionLocalLlm.style.display = engine === 'local' ? 'block' : 'none';
+                if (sectionPollinations) sectionPollinations.style.display = engine === 'pollinations' ? 'block' : 'none';
+            });
+        }
     }
 
-    // VIEW SWITCHING
+    // VIEW SWITCHERS
     function showExploreView() {
-        closeMobileSidebar();
         exploreView.classList.remove('hidden');
         chatView.classList.add('hidden');
         navExplore.classList.add('active');
         navActiveChat.classList.remove('active');
     }
 
-    const brandLogoHome = document.getElementById('brandLogoHome');
-    const mobileBrandHome = document.getElementById('mobileBrandHome');
-
-    if (brandLogoHome) {
-        brandLogoHome.addEventListener('click', (e) => {
-            e.preventDefault();
-            showExploreView();
-        });
-    }
-
-    if (mobileBrandHome) {
-        mobileBrandHome.addEventListener('click', (e) => {
-            e.preventDefault();
-            showExploreView();
-        });
-    }
-
     function showChatView() {
-        closeMobileSidebar();
         exploreView.classList.add('hidden');
         chatView.classList.remove('hidden');
         navExplore.classList.remove('active');
         navActiveChat.classList.add('active');
+        scrollToBottom();
     }
 
     // LOAD CHARACTERS
@@ -216,37 +277,32 @@ document.addEventListener('DOMContentLoaded', () => {
             renderSpicyGrid();
         } catch (err) {
             console.error("Error loading characters:", err);
-            sidebarList.innerHTML = `<div class="error-box">Gagal memuat karakter!</div>`;
+            characterList.innerHTML = '<div style="color:red; padding:10px;">Gagal memuat karakter</div>';
         }
     }
 
-    // RENDER SPICYCHAT CARDS GRID IN EXPLORE VIEW
+    // RENDER EXPLORE GRID
     function renderSpicyGrid() {
         spicyGrid.innerHTML = '';
-        const searchQuery = inputSearchChar.value.toLowerCase().trim();
+        const search = inputSearchChar.value.toLowerCase().trim();
 
         const filtered = characters.filter(c => {
             const allowNsfw = c.allow_nsfw || false;
-            const strictness = c.strictness || (allowNsfw ? 'low' : 'high');
-
-            const isUncen = allowNsfw && (strictness === 'low' || strictness === 'uncensored');
+            const strictness = (c.strictness || (allowNsfw ? 'uncensored' : 'high')).toLowerCase();
+            const isUncen = allowNsfw && (strictness === 'low' || strictness === 'uncensored' || strictness === 'nsfw');
             const isMedium = allowNsfw && (strictness === 'medium');
             const isSafe = !allowNsfw || strictness === 'high' || strictness === 'safe';
 
-            // Filter Category Pill
             if (currentFilter === 'nsfw' && !isUncen) return false;
             if (currentFilter === 'medium' && !isMedium) return false;
             if (currentFilter === 'safe' && !isSafe) return false;
 
-            // Filter Search Text
-            if (searchQuery) {
-                const nameMatch = c.name.toLowerCase().includes(searchQuery);
-                const titleMatch = (c.title || '').toLowerCase().includes(searchQuery);
-                const scenarioMatch = (c.scenario || '').toLowerCase().includes(searchQuery);
-                const tagMatch = (c.tags || []).some(t => t.toLowerCase().includes(searchQuery));
-                return nameMatch || titleMatch || scenarioMatch || tagMatch;
+            if (search) {
+                const matchName = c.name && c.name.toLowerCase().includes(search);
+                const matchTitle = c.title && c.title.toLowerCase().includes(search);
+                const matchTags = c.tags && c.tags.some(t => t.toLowerCase().includes(search));
+                return matchName || matchTitle || matchTags;
             }
-
             return true;
         });
 
@@ -261,9 +317,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const initial = c.name ? c.name.charAt(0).toUpperCase() : 'B';
             const allowNsfw = c.allow_nsfw || false;
-            const strictness = c.strictness || (allowNsfw ? 'low' : 'high');
+            const strictness = (c.strictness || (allowNsfw ? 'uncensored' : 'high')).toLowerCase();
 
-            const isUncen = allowNsfw && (strictness === 'low' || strictness === 'uncensored');
+            const isUncen = allowNsfw && (strictness === 'low' || strictness === 'uncensored' || strictness === 'nsfw');
             const isMedium = allowNsfw && (strictness === 'medium');
 
             let badgeClass = 'badge-safe';
@@ -323,12 +379,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const initial = c.name ? c.name.charAt(0).toUpperCase() : 'B';
             const affinity = c.current_affinity || 10;
             const allowNsfw = c.allow_nsfw || false;
-            const strictness = c.strictness || 'low';
+            const strictness = (c.strictness || (allowNsfw ? 'uncensored' : 'high')).toLowerCase();
             const avatarUrl = c.avatar_url || '';
 
             let badgeClass = 'badge-safe';
             let badgeText = 'SAFE';
-            if (allowNsfw && strictness === 'low') {
+            if (allowNsfw && (strictness === 'low' || strictness === 'uncensored' || strictness === 'nsfw')) {
                 badgeClass = 'badge-nsfw';
                 badgeText = 'UNCENSORED';
             } else if (strictness === 'medium') {
@@ -368,24 +424,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
         activeChar = char;
         navActiveChatLabel.textContent = char.name;
-        renderSidebarList(); // Refresh active card UI in sidebar
+        renderSidebarList();
 
-        // DYNAMIC THEME SWITCHING BASED ON CHARACTER TYPE
+        // DYNAMIC THEME
         const allowNsfw = char.allow_nsfw || false;
-        const strictness = char.strictness || 'low';
+        const strictness = (char.strictness || (allowNsfw ? 'uncensored' : 'high')).toLowerCase();
 
         let theme = 'safe';
-        if (allowNsfw && strictness === 'low') {
-            theme = 'nsfw'; // Love Hotel Velvet Crimson & Neon Pink
+        if (allowNsfw && (strictness === 'low' || strictness === 'uncensored' || strictness === 'nsfw')) {
+            theme = 'nsfw'; // Velvet Crimson & Neon Glow
         } else if (strictness === 'medium') {
-            theme = 'medium'; // Dim Classy Violet & Royal Purple Lounge
+            theme = 'medium'; // Royal Violet Lounge
         } else {
-            theme = 'safe'; // Bright Energetic Star Indigo
+            theme = 'safe'; // Star Indigo
         }
 
         document.documentElement.setAttribute('data-theme', theme);
 
-        // UPDATE CHAT HEADER INFO
+        // UPDATE HEADER
         const initial = char.name ? char.name.charAt(0).toUpperCase() : 'B';
         const avatarUrl = char.avatar_url || '';
 
@@ -402,7 +458,6 @@ document.addEventListener('DOMContentLoaded', () => {
         headerAffinityScore.textContent = `${affinity}/100`;
         headerAffinityBar.style.width = `${affinity}%`;
 
-        // Update Badge
         if (theme === 'nsfw') {
             headerBadge.className = 'badge badge-nsfw';
             headerBadge.textContent = 'UNCENSORED';
@@ -415,8 +470,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         showChatView();
-
-        // LOAD CHAT HISTORY FOR THIS CHARACTER
         await loadChatHistory(charId);
     }
 
@@ -428,7 +481,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const history = await res.json();
 
             if (history.length === 0) {
-                // If history is empty, pick a random greeting from greetings array or fallback
                 const greetingsList = activeChar.greetings || [activeChar.greeting || "Halo!"];
                 const randomGreeting = greetingsList[Math.floor(Math.random() * greetingsList.length)];
                 appendMessage(activeChar.name, randomGreeting, 'char');
@@ -444,7 +496,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // FORMAT & APPEND MESSAGE TO STREAM WITH REAL LIVE IMAGE GENERATION
+    // FORMAT & APPEND MESSAGE TO STREAM WITH DYNAMIC DATASET IMAGE SEARCH
     function appendMessage(sender, text, type) {
         const row = document.createElement('div');
         row.className = `message-row ${type}-row`;
@@ -462,99 +514,128 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (formattedText.includes('[IMAGE_TRIGGER:')) {
             const parts = formattedText.split('[IMAGE_TRIGGER:');
-            formattedText = parts[0];
+            formattedText = parts[0].trim();
             const promptStr = parts[1].split(']')[0];
             imageTrigger = promptStr.trim ? promptStr.trim() : promptStr;
         }
 
         // Parse *actions* into glowing italicized tags
         formattedText = formattedText.replace(/\*(.*?)\*/g, '<em class="action-text">*$1*</em>');
-
         bubble.innerHTML = formattedText.replace(/\n/g, '<br>');
 
-        // APPEND 100% ACCURATE CURATED LOCAL CHARACTER PHOTO BASED ON SCENARIO PROMPT
+        // RENDER DYNAMIC DATASET IMAGE IF REQUESTED
         if (imageTrigger) {
             const triggerCard = document.createElement('div');
             triggerCard.className = 'generated-image-card';
-            const imgId = 'ai-img-' + Math.floor(Math.random() * 999999);
+            const imgId = 'ds-img-' + Math.floor(Math.random() * 999999);
 
             triggerCard.innerHTML = `
-                <div class="image-header" id="hdr-${imgId}">
-                    <i class="fa-solid fa-bolt"></i>
-                    <span><strong>🚀 Meminta GPU Colab Menggambar Foto ${activeChar ? activeChar.name : ''}...</strong></span>
+                <div class="image-header" id="hdr-${imgId}" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-camera-retro"></i>
+                        <span><strong>📸 Mencari Foto ${activeChar ? activeChar.name : ''} dari Dataset...</strong></span>
+                    </div>
                 </div>
-                <div class="image-wrapper-box">
+                <div class="image-wrapper-box" style="cursor: pointer;" title="Klik untuk memperbesar foto">
                     <div class="image-loading-spinner" id="spin-${imgId}">
                         <i class="fa-solid fa-spinner fa-spin"></i>
-                        <span>Sedang menggambar via Free Colab GPU (NVIDIA T4)...</span>
+                        <span>Mencocokkan skenario dengan ribuan foto di Dataset Parquet...</span>
                     </div>
                     <img id="${imgId}" 
                          alt="${imageTrigger}" 
                          class="rendered-ai-img hidden"
                          onload="this.classList.remove('hidden'); const sp = document.getElementById('spin-${imgId}'); if(sp) sp.style.display='none'; if(window.scrollToBottom) window.scrollToBottom();"
-                         onerror="const sp = document.getElementById('spin-${imgId}'); if(sp) sp.innerHTML='⚠️ Gagal memuat foto.';"
+                         onerror="const sp = document.getElementById('spin-${imgId}'); if(sp) sp.innerHTML='⚠️ Gagal memuat foto dataset.';"
                     >
                 </div>
-                <div class="image-prompt-caption">Skenario: <em>"${imageTrigger}"</em></div>
+                <div class="image-prompt-caption" id="cap-${imgId}">
+                    <span>Skenario: <em>"${imageTrigger}"</em></span>
+                    <span id="tags-${imgId}" style="margin-left: 8px; color: #00f5d4; font-size: 11px;"></span>
+                </div>
             `;
             bubble.appendChild(triggerCard);
 
-            // Fetch Image asynchronously
-            (async () => {
+            // Function to fetch/regenerate image
+            async function fetchDatasetImage(isRegen = false) {
                 const imgElem = triggerCard.querySelector('.rendered-ai-img');
                 const hdrElem = triggerCard.querySelector('.image-header');
-                const promptLower = imageTrigger.toLowerCase();
+                const tagsElem = document.getElementById(`tags-${imgId}`);
+                const spinElem = document.getElementById(`spin-${imgId}`);
+                const charId = activeChar ? activeChar.id : 'char';
 
-                // 1. Try Colab GPU Engine if connected
+                if (isRegen) {
+                    if (spinElem) {
+                        spinElem.style.display = 'flex';
+                        spinElem.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Mencari variasi foto lain yang cocok...</span>`;
+                    }
+                    if (imgElem) imgElem.classList.add('hidden');
+                    const curBtn = triggerCard.querySelector('.btn-regen-photo');
+                    if (curBtn) {
+                        curBtn.disabled = true;
+                        curBtn.innerHTML = `<i class="fa-solid fa-arrows-rotate fa-spin"></i> <span>Mencari...</span>`;
+                    }
+                }
+
+                if (!sessionImageHistory[charId]) {
+                    sessionImageHistory[charId] = [];
+                }
+
                 try {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 4000);
-
-                    const res = await fetch('/api/generate_lora_image', {
+                    const res = await fetch('/api/search_character_image', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        signal: controller.signal,
                         body: JSON.stringify({
-                            char_id: activeChar ? activeChar.id : 'char',
-                            prompt: imageTrigger
+                            char_id: charId,
+                            prompt: imageTrigger,
+                            excluded_urls: sessionImageHistory[charId]
                         })
                     });
-                    clearTimeout(timeoutId);
+
                     const data = await res.json();
-                    if (data.status === 'success' && data.image_b64) {
-                        if (imgElem) imgElem.src = data.image_b64;
-                        if (hdrElem) hdrElem.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles" style="color: #00f5d4;"></i> <span><strong>✨ Foto AI LoRA Baru (Colab GPU Engine)</strong></span>`;
+                    if (data.status === 'success' && data.image_url) {
+                        const finalUrl = data.image_url;
+                        sessionImageHistory[charId].push(finalUrl);
+
+                        if (imgElem) {
+                            imgElem.src = finalUrl;
+                            imgElem.onclick = () => {
+                                openLightbox(finalUrl, `${activeChar ? activeChar.name : ''} - ${imageTrigger}`);
+                            };
+                        }
+                        if (hdrElem) {
+                            hdrElem.innerHTML = `
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <i class="fa-solid fa-images" style="color: #00f5d4;"></i> 
+                                    <span><strong>✨ Foto ${activeChar ? activeChar.name : 'Karakter'}</strong></span>
+                                </div>
+                                <button class="btn-regen-photo" title="Cari / Acak foto lain dari dataset yang cocok dengan skenario ini">
+                                    <i class="fa-solid fa-arrows-rotate"></i> <span>Ganti Foto</span>
+                                </button>
+                            `;
+                            const newRegenBtn = hdrElem.querySelector('.btn-regen-photo');
+                            if (newRegenBtn) {
+                                newRegenBtn.onclick = (e) => {
+                                    e.stopPropagation();
+                                    fetchDatasetImage(true);
+                                };
+                            }
+                        }
+                        if (tagsElem && data.matched_tags && data.matched_tags.length > 0) {
+                            tagsElem.innerHTML = `• Tag Cocok: <em>${data.matched_tags.join(', ')}</em>`;
+                        }
                         return;
                     }
                 } catch (err) {
-                    console.log("Colab GPU Proxy offline, using local 2D anime dataset photo");
+                    console.error("Dataset search error:", err);
                 }
 
-                // 2. Local Curated 2D Anime Photo Matching (100% Guaranteed 2D & 100% Karakter Asli)
-                let localPhotoUrl = '';
-                if (activeChar && activeChar.local_photos && activeChar.local_photos.length > 0) {
-                    const photos = activeChar.local_photos;
-                    let matched = null;
-
-                    if (promptLower.includes('mandi') || promptLower.includes('kamar') || promptLower.includes('tidur') || promptLower.includes('kasur') || promptLower.includes('hot') || promptLower.includes('uncen') || promptLower.includes('seks') || promptLower.includes('telanjang') || promptLower.includes('busa')) {
-                        matched = photos.find(p => p.includes('hot') || p.includes('uncen') || p.includes('hard') || p.includes('middle') || p.includes('low') || p.includes('chan'));
-                    } else if (promptLower.includes('kedai') || promptLower.includes('sake') || promptLower.includes('santai') || promptLower.includes('jalan')) {
-                        matched = photos.find(p => p.includes('1') || p.includes('2') || p.includes('ruby'));
-                    } else if (promptLower.includes('jahat') || promptLower.includes('evil')) {
-                        matched = photos.find(p => p.includes('evil'));
-                    }
-
-                    localPhotoUrl = matched || photos[Math.floor(Math.random() * photos.length)];
-                } else {
-                    const visualAnchor = activeChar ? (activeChar.visual_prompt || activeChar.name) : '';
-                    const fullImagePrompt = `masterpiece, 2d anime style, ${visualAnchor}, ${imageTrigger}`;
-                    const seed = Math.floor(Math.random() * 9999999);
-                    localPhotoUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullImagePrompt)}?model=anime&nologo=true&width=512&height=512&seed=${seed}`;
+                // Fallback to avatar if search returned nothing
+                if (imgElem && activeChar && activeChar.avatar_url) {
+                    imgElem.src = activeChar.avatar_url;
                 }
+            }
 
-                if (imgElem) imgElem.src = localPhotoUrl;
-                if (hdrElem) hdrElem.innerHTML = `<i class="fa-solid fa-camera-retro" style="color: #00f5d4;"></i> <span><strong>📸 Foto 2D ${activeChar ? activeChar.name : 'Karakter'} (Acuan 100% Akurat)</strong></span>`;
-            })();
+            fetchDatasetImage(false);
         }
 
         row.appendChild(nameSpan);
@@ -571,6 +652,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         isSending = true;
         messageInput.value = '';
+        messageInput.style.height = 'auto';
 
         // Append User Message to UI
         appendMessage('You', text, 'user');
@@ -597,7 +679,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 appendMessage(data.sender, data.message, 'char');
 
                 // Update Affinity Score
-                if (data.affinity_score) {
+                if (data.affinity_score !== undefined) {
                     activeChar.current_affinity = data.affinity_score;
                     headerAffinityScore.textContent = `${data.affinity_score}/100`;
                     headerAffinityBar.style.width = `${data.affinity_score}%`;
@@ -623,6 +705,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             await fetch(`/api/clear/${activeChar.id}`, { method: 'POST' });
+            if (sessionImageHistory[activeChar.id]) {
+                sessionImageHistory[activeChar.id] = [];
+            }
             await loadChatHistory(activeChar.id);
         } catch (err) {
             console.error("Error clearing history:", err);
@@ -658,72 +743,83 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // KEY MODAL
+    // SETTINGS MODAL
     async function openKeyModal() {
         modalKey.classList.remove('hidden');
-        await checkApiKeyStatus();
+        await checkSettingsStatus();
     }
 
-    async function checkApiKeyStatus() {
+    async function checkSettingsStatus() {
         try {
-            const res = await fetch('/api/key');
+            const res = await fetch('/api/settings');
             const data = await res.json();
 
-            const inputGeminiKey = document.getElementById('inputGeminiKey');
-            const inputGroqKey = document.getElementById('inputGroqKey');
-            const inputColabUrl = document.getElementById('inputColabUrl');
+            if (selectLlmEngine && data.llm_engine) {
+                selectLlmEngine.value = data.llm_engine;
+            }
+            if (inputGeminiKey && data.gemini_api_key) {
+                inputGeminiKey.value = data.gemini_api_key;
+            }
+            if (inputGeminiModel && data.gemini_model) {
+                inputGeminiModel.value = data.gemini_model;
+            }
+            if (inputPollinationsModel && data.pollinations_model) {
+                inputPollinationsModel.value = data.pollinations_model;
+            }
+            if (inputLocalUrl && data.local_llm_url) {
+                inputLocalUrl.value = data.local_llm_url;
+            }
+            if (inputLocalModel && data.local_llm_model) {
+                inputLocalModel.value = data.local_llm_model;
+            }
 
-            if (data.colab_gpu_url) inputColabUrl.value = data.colab_gpu_url;
+            const engine = data.llm_engine || 'gemini';
+            if (sectionGemini) sectionGemini.style.display = engine === 'gemini' ? 'block' : 'none';
+            if (sectionLocalLlm) sectionLocalLlm.style.display = engine === 'local' ? 'block' : 'none';
+            if (sectionPollinations) sectionPollinations.style.display = engine === 'pollinations' ? 'block' : 'none';
 
             let html = '';
-            if (data.has_gemini_key) {
-                html += `<div style="color: #00f5d4;"><i class="fa-solid fa-check"></i> Gemini 1.5 API Key Aktif (${data.gemini_preview})</div>`;
+            if (engine === 'gemini') {
+                html += `<div style="color: #00f5d4;"><i class="fa-solid fa-brain"></i> Mesin Aktif: <strong>Google Gemini (${data.gemini_model || 'gemini-2.5-flash'})</strong> [BLOCK_NONE 100% Uncensored Active]</div>`;
+                if (activeEngineBadge) activeEngineBadge.innerHTML = `<i class="fa-solid fa-brain"></i> Gemini (${data.gemini_model || 'gemini-2.5-flash'}) Uncensored`;
+            } else if (engine === 'local') {
+                html += `<div style="color: #00f5d4;"><i class="fa-solid fa-laptop-code"></i> Mesin Aktif: <strong>Local AI (${data.local_llm_model || 'mistral'})</strong> @ ${data.local_llm_url || 'http://localhost:11434/v1'}</div>`;
+                if (activeEngineBadge) activeEngineBadge.innerHTML = `<i class="fa-solid fa-laptop-code"></i> Local AI (${data.local_llm_model || 'mistral'}) Active`;
             } else {
-                html += `<div style="color: #ffb703;"><i class="fa-solid fa-circle-info"></i> Gemini API Key belum diisi (Opsional)</div>`;
-            }
-
-            if (data.has_groq_key) {
-                html += `<div style="color: #00f5d4;"><i class="fa-solid fa-check"></i> Groq Llama-3.3 API Key Aktif (${data.groq_preview})</div>`;
-            } else {
-                html += `<div style="color: #ffb703;"><i class="fa-solid fa-circle-info"></i> Groq API Key belum diisi (Opsional)</div>`;
-            }
-
-            if (data.colab_gpu_url) {
-                html += `<div style="color: #00f5d4;"><i class="fa-solid fa-bolt"></i> Colab GPU Engine Tunnel Connected!</div>`;
-            } else {
-                html += `<div style="color: #bc93aa;"><i class="fa-solid fa-info-circle"></i> Engine Gambar: Menggunakan Dataset Local & Pollinations Model Anime</div>`;
+                html += `<div style="color: #00f5d4;"><i class="fa-solid fa-cloud-bolt"></i> Mesin Aktif: <strong>Pollinations AI Uncensored (${data.pollinations_model || 'openai'})</strong></div>`;
+                if (activeEngineBadge) activeEngineBadge.innerHTML = `<i class="fa-solid fa-bolt"></i> Pollinations AI (${data.pollinations_model || 'openai'}) Uncensored`;
             }
 
             keyStatusBox.innerHTML = html;
         } catch (err) {
-            console.error("Error checking key status:", err);
+            console.error("Error checking settings status:", err);
         }
     }
 
-    async function handleSaveKey() {
-        const gemini_key = document.getElementById('inputGeminiKey').value.trim();
-        const groq_key = document.getElementById('inputGroqKey').value.trim();
-        const colab_url = document.getElementById('inputColabUrl').value.trim();
+    async function handleSaveSettings() {
+        const llm_engine = selectLlmEngine.value;
+        const gemini_api_key = inputGeminiKey ? inputGeminiKey.value.trim() : '';
+        const gemini_model = inputGeminiModel ? (inputGeminiModel.value.trim() || 'gemini-2.5-flash') : 'gemini-2.5-flash';
+        const pollinations_model = inputPollinationsModel.value.trim() || 'openai';
+        const local_llm_url = inputLocalUrl.value.trim() || 'http://localhost:11434/v1';
+        const local_llm_model = inputLocalModel.value.trim() || 'mistral';
 
         try {
-            if (gemini_key || groq_key) {
-                await fetch('/api/key', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ gemini_key, groq_key })
-                });
-            }
+            await fetch('/api/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    llm_engine,
+                    gemini_api_key,
+                    gemini_model,
+                    pollinations_model,
+                    local_llm_url,
+                    local_llm_model
+                })
+            });
 
-            if (colab_url !== undefined) {
-                await fetch('/api/colab_gpu', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ colab_url })
-                });
-            }
-
-            await checkApiKeyStatus();
-            alert('Pengaturan API & GPU Engine berhasil disimpan!');
+            await checkSettingsStatus();
+            alert('Pengaturan Mesin AI berhasil disimpan!');
             modalKey.classList.add('hidden');
         } catch (err) {
             console.error("Error saving settings:", err);

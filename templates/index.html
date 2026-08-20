@@ -81,7 +81,7 @@
                 </button>
                 <button class="tool-btn" id="btnOpenKey">
                     <i class="fa-solid fa-sliders"></i>
-                    <span>API & GPU Engine Settings</span>
+                    <span>Pengaturan Mesin AI</span>
                 </button>
             </div>
         </aside>
@@ -185,7 +185,7 @@
                     <div class="input-footer-info">
                         <span><i class="fa-solid fa-sparkles"></i> Gunakan tanda <code>*aksi fisik*</code> untuk narasi
                             kontak fisik / ekspresi</span>
-                        <span id="activeEngineBadge"><i class="fa-solid fa-bolt"></i> Groq Llama-3.3-70B Active</span>
+                        <span id="activeEngineBadge"><i class="fa-solid fa-bolt"></i> Pollinations AI (Uncensored)</span>
                     </div>
                 </div>
             </section>
@@ -210,48 +210,84 @@
         </div>
     </div>
 
-    <!-- MODAL SETTINGS (GROQ, GEMINI & COLAB GPU TUNNEL) -->
+    <!-- MODAL SETTINGS (100% UNCENSORED MESIN CHAT & LOCAL LLM) -->
     <div class="modal-overlay hidden" id="modalKey">
         <div class="modal-card">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-sliders"></i> Pengaturan API & Engine GPU Colab</h3>
+                <h3><i class="fa-solid fa-sliders"></i> Pengaturan Mesin AI (100% Uncensored)</h3>
                 <button class="close-modal-btn" id="btnCloseKey">&times;</button>
             </div>
             <div class="modal-body">
-                <p class="modal-desc">Atur API Key LLM Teks (Gemini 1.5 Flash / Groq) dan URL Colab GPU Tunnel untuk
-                    Generasi Gambar 2D Anime LoRA:</p>
+                <p class="modal-desc">Pilih mesin kecerdasan buatan untuk chat bebas sensor & tanpa batas:</p>
 
                 <div class="settings-section">
-                    <label class="setting-label"><strong>✨ Gemini 1.5 Flash API Key (Primary - BLOCK_NONE
-                            Safety):</strong></label>
+                    <label class="setting-label"><strong>🚀 Pilihan Mesin Chat Utama:</strong></label>
                     <div class="input-group">
-                        <input type="password" id="inputGeminiKey" placeholder="AIzaSy..." autocomplete="off">
+                        <select id="selectLlmEngine" class="styled-select" style="width: 100%; padding: 10px 14px; background: rgba(20,20,30,0.8); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff; font-size: 14px; outline: none;">
+                            <option value="gemini">Google Gemini (Ultra Cerdas, Emosi Manusiawi & BLOCK_NONE Uncensored)</option>
+                            <option value="pollinations">Pollinations AI (Uncensored Cloud - Gratis 0 Key)</option>
+                            <option value="local">Local AI (Ollama / LM Studio / KoboldCpp di PC Kamu)</option>
+                        </select>
                     </div>
                 </div>
 
-                <div class="settings-section" style="margin-top: 12px;">
-                    <label class="setting-label"><strong>⚡ Groq API Key (Secondary Llama 3.3):</strong></label>
+                <!-- GEMINI CONFIG SECTION -->
+                <div class="settings-section" id="sectionGemini" style="margin-top: 14px;">
+                    <label class="setting-label"><strong>🔑 Gemini API Key:</strong></label>
                     <div class="input-group">
-                        <input type="password" id="inputGroqKey" placeholder="gsk_..." autocomplete="off">
+                        <input type="password" id="inputGeminiKey" placeholder="Masukkan Gemini API Key..." autocomplete="off">
+                    </div>
+                    <label class="setting-label" style="margin-top: 8px;"><strong>✨ Model Gemini:</strong></label>
+                    <div class="input-group">
+                        <input type="text" id="inputGeminiModel" placeholder="gemini-2.5-flash" autocomplete="off">
+                    </div>
+                    <small style="color: #bc93aa; font-size: 12px; margin-top: 4px; display: block;">Tersedia: <code>gemini-2.5-flash</code>, <code>gemini-2.0-flash</code>, <code>gemini-flash-latest</code> (Semua filter dinonaktifkan dengan BLOCK_NONE)</small>
+                </div>
+
+                <!-- POLLINATIONS MODEL SECTION -->
+                <div class="settings-section" id="sectionPollinations" style="margin-top: 14px; display: none;">
+                    <label class="setting-label"><strong>✨ Model Pollinations:</strong></label>
+                    <div class="input-group">
+                        <input type="text" id="inputPollinationsModel" placeholder="openai (atau mistral, evil, claude-hybrid)" autocomplete="off">
+                    </div>
+                    <small style="color: #bc93aa; font-size: 12px; margin-top: 4px; display: block;">Model rekomendasi: <code>openai</code>, <code>mistral</code>, <code>evil</code>, <code>qwen-coder</code></small>
+                </div>
+
+                <!-- LOCAL LLM CONFIG SECTION -->
+                <div class="settings-section" id="sectionLocalLlm" style="margin-top: 14px; display: none;">
+                    <label class="setting-label"><strong>💻 Local LLM Base URL:</strong></label>
+                    <div class="input-group">
+                        <input type="text" id="inputLocalUrl" placeholder="http://localhost:11434/v1" autocomplete="off">
+                    </div>
+                    <label class="setting-label" style="margin-top: 8px;"><strong>📦 Nama Model Lokal:</strong></label>
+                    <div class="input-group">
+                        <input type="text" id="inputLocalModel" placeholder="mistral, llama3, dolphin-mixtral, dll" autocomplete="off">
+                    </div>
+                    <small style="color: #bc93aa; font-size: 12px; margin-top: 4px; display: block;">Untuk Ollama: <code>http://localhost:11434/v1</code> | LM Studio: <code>http://localhost:1234/v1</code></small>
+                </div>
+
+                <div class="settings-section" style="margin-top: 14px; padding: 12px; background: rgba(0, 245, 212, 0.05); border: 1px solid rgba(0, 245, 212, 0.2); border-radius: 8px;">
+                    <div style="font-size: 13px; color: #00f5d4;"><i class="fa-solid fa-images"></i> <strong>Dataset Pencarian Gambar:</strong></div>
+                    <div style="font-size: 12px; color: #e0d0db; margin-top: 4px;">
+                        Tersedia <strong>10.000+ Gambar 2D Anime Karakter</strong> di <code>dataset/dataset_index.json</code>. Chatbot otomatis mencocokkan outfit, pose, dan suasana obrolan langsung dari dataset.
                     </div>
                 </div>
 
-                <div class="settings-section" style="margin-top: 12px;">
-                    <label class="setting-label"><strong>🚀 Colab GPU Tunnel URL (Free NVIDIA T4 GPU
-                            Engine):</strong></label>
-                    <div class="input-group">
-                        <input type="text" id="inputColabUrl" placeholder="https://xxxx.loca.lt atau ngrok URL..."
-                            autocomplete="off">
-                    </div>
-                </div>
-
-                <button class="btn-primary" id="btnSaveKey" style="width: 100%; margin-top: 16px;">Simpan Semua
-                    Pengaturan</button>
+                <button class="btn-primary" id="btnSaveKey" style="width: 100%; margin-top: 16px;">Simpan Pengaturan</button>
 
                 <div class="key-status-box" id="keyStatusBox" style="margin-top: 14px;">
                     <!-- Status loaded via JS -->
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- LIGHTBOX MODAL FOR FULL RESOLUTION IMAGES -->
+    <div class="modal-overlay hidden" id="modalLightbox" style="z-index: 9999; background: rgba(0, 0, 0, 0.88); backdrop-filter: blur(10px);">
+        <div style="position: relative; max-width: 90vw; max-height: 90vh; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <button id="btnCloseLightbox" style="position: absolute; top: -45px; right: 0; background: rgba(255,255,255,0.15); border: none; color: #fff; font-size: 22px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
+            <img id="lightboxImg" src="" alt="Full Character Photo" style="max-width: 90vw; max-height: 82vh; border-radius: 12px; object-fit: contain; box-shadow: 0 10px 40px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.1);">
+            <div id="lightboxCaption" style="color: #bc93aa; font-size: 13px; margin-top: 10px; text-align: center;"></div>
         </div>
     </div>
 
